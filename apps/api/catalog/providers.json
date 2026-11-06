@@ -1,0 +1,258 @@
+[
+  {
+    "id": "ollama",
+    "name": "Ollama",
+    "description": "Run open models on your Mac. No API key required.",
+    "kind": "openai",
+    "baseUrl": "http://127.0.0.1:11434/v1",
+    "deployment": "local",
+    "localKind": "ollama",
+    "defaultModel": "llama3.2",
+    "opencodeNative": false,
+    "supportedAgents": ["codex", "opencode", "pi"]
+  },
+  {
+    "id": "vllm",
+    "name": "vLLM",
+    "description": "Serve open models with vLLM's OpenAI-compatible API.",
+    "kind": "openai",
+    "baseUrl": "http://127.0.0.1:8000/v1",
+    "deployment": "local",
+    "localKind": "endpoint",
+    "defaultModel": null,
+    "opencodeNative": false,
+    "supportedAgents": ["codex", "opencode", "pi"]
+  },
+  {
+    "id": "0g",
+    "name": "0G",
+    "description": "0G Private Computer: one sk- API key for 100+ chat models, with image and video models, on OpenAI- and Anthropic-compatible routes.",
+    "kind": "openai",
+    "baseUrl": "https://router-api.0g.ai/v1",
+    "deployment": "cloud",
+    "defaultModel": "glm-5.3",
+    "featured": true,
+    "opencodeNative": false,
+    "supportedAgents": ["claude", "codex", "opencode", "hermes", "pi"],
+    "routes": {
+      "openai": {
+        "baseUrl": "https://router-api.0g.ai/v1",
+        "defaultModel": "glm-5.3"
+      },
+      "anthropic": {
+        "baseUrl": "https://router-api.0g.ai",
+        "defaultModel": "glm-5.3"
+      }
+    }
+  },
+  {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "description": "Official Anthropic API at api.anthropic.com.",
+    "kind": "anthropic",
+    "baseUrl": "https://api.anthropic.com",
+    "deployment": "cloud",
+    "defaultModel": "claude-sonnet-4-6",
+    "opencodeNative": true,
+    "supportedAgents": ["claude", "codex", "opencode", "hermes", "pi"],
+    "curatedModels": [
+      { "id": "claude-sonnet-4-6", "name": "Claude Sonnet 4.6" },
+      { "id": "claude-opus-4-6", "name": "Claude Opus 4.6" },
+      { "id": "claude-haiku-4-5", "name": "Claude Haiku 4.5" }
+    ]
+  },
+  {
+    "id": "openai",
+    "name": "OpenAI",
+    "description": "Official OpenAI API for GPT models.",
+    "kind": "openai",
+    "baseUrl": "https://api.openai.com/v1",
+    "deployment": "cloud",
+    "defaultModel": "gpt-4o",
+    "opencodeNative": true,
+    "supportedAgents": ["codex", "opencode", "hermes", "pi"]
+  },
+  {
+    "id": "google",
+    "name": "Google",
+    "description": "Gemini models from Google.",
+    "kind": "openai",
+    "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "deployment": "cloud",
+    "defaultModel": "gemini-2.0-flash",
+    "opencodeNative": true,
+    "supportedAgents": ["codex", "opencode", "hermes", "pi"]
+  },
+  {
+    "id": "fireworks",
+    "name": "Fireworks",
+    "description": "Fast inference for open and frontier models. OpenAI- and Anthropic-compatible APIs.",
+    "kind": "openai",
+    "baseUrl": "https://api.fireworks.ai/inference/v1",
+    "deployment": "cloud",
+    "defaultModel": "accounts/fireworks/models/llama-v3p1-70b-instruct",
+    "opencodeNative": true,
+    "supportedAgents": ["claude", "codex", "opencode", "hermes", "pi"],
+    "routes": {
+      "openai": {
+        "baseUrl": "https://api.fireworks.ai/inference/v1",
+        "defaultModel": "accounts/fireworks/models/llama-v3p1-70b-instruct"
+      },
+      "anthropic": {
+        "baseUrl": "https://api.fireworks.ai/inference",
+        "defaultModel": "accounts/fireworks/routers/glm-latest[1m]",
+        "curatedModels": [
+          {
+            "id": "accounts/fireworks/routers/glm-latest[1m]",
+            "name": "GLM Latest (router)"
+          },
+          {
+            "id": "accounts/fireworks/models/glm-5p1",
+            "name": "GLM 5.1"
+          },
+          {
+            "id": "accounts/fireworks/models/minimax-m2p5",
+            "name": "MiniMax M2.5"
+          },
+          {
+            "id": "accounts/fireworks/models/claude-sonnet-4-5",
+            "name": "Claude Sonnet 4.5"
+          },
+          {
+            "id": "accounts/fireworks/models/claude-opus-4-5",
+            "name": "Claude Opus 4.5"
+          },
+          {
+            "id": "accounts/fireworks/models/claude-haiku-4-5",
+            "name": "Claude Haiku 4.5"
+          }
+        ],
+        "claudeModels": {
+          "model": "accounts/fireworks/routers/glm-latest[1m]",
+          "opus": "accounts/fireworks/routers/glm-latest[1m]",
+          "sonnet": "accounts/fireworks/models/glm-5p1",
+          "haiku": "accounts/fireworks/models/minimax-m2p5",
+          "subagent": "accounts/fireworks/models/minimax-m2p5"
+        }
+      }
+    }
+  },
+  {
+    "id": "akashml",
+    "name": "AkashML",
+    "description": "Managed open-model inference on the Akash Network. OpenAI- and Anthropic-compatible APIs.",
+    "kind": "openai",
+    "baseUrl": "https://api.akashml.com/v1",
+    "deployment": "cloud",
+    "defaultModel": "MiniMaxAI/MiniMax-M2.5",
+    "opencodeNative": false,
+    "supportedAgents": ["claude", "codex", "opencode", "hermes", "pi"],
+    "routes": {
+      "openai": {
+        "baseUrl": "https://api.akashml.com/v1",
+        "defaultModel": "MiniMaxAI/MiniMax-M2.5"
+      },
+      "anthropic": {
+        "baseUrl": "https://api.akashml.com/anthropic",
+        "defaultModel": "deepseek-ai/DeepSeek-V4-Flash",
+        "curatedModels": [
+          { "id": "deepseek-ai/DeepSeek-V4-Flash", "name": "DeepSeek V4 Flash" },
+          { "id": "zai-org/GLM-5.2", "name": "GLM 5.2" },
+          { "id": "Qwen/Qwen3.5-35B-A3B", "name": "Qwen3.5 35B A3B" },
+          { "id": "MiniMaxAI/MiniMax-M2.5", "name": "MiniMax M2.5" },
+          { "id": "meta-llama/Llama-3.3-70B-Instruct", "name": "Llama 3.3 70B Instruct" },
+          { "id": "Qwen/Qwen3.6-35B-A3B", "name": "Qwen3.6 35B A3B" }
+        ],
+        "claudeModels": {
+          "model": "deepseek-ai/DeepSeek-V4-Flash",
+          "sonnet": "deepseek-ai/DeepSeek-V4-Flash",
+          "opus": "zai-org/GLM-5.2",
+          "haiku": "Qwen/Qwen3.5-35B-A3B",
+          "subagent": "Qwen/Qwen3.5-35B-A3B"
+        }
+      }
+    }
+  },
+  {
+    "id": "groq",
+    "name": "Groq",
+    "description": "Ultra-low latency inference for popular open models.",
+    "kind": "openai",
+    "baseUrl": "https://api.groq.com/openai/v1",
+    "deployment": "cloud",
+    "defaultModel": "llama-3.3-70b-versatile",
+    "opencodeNative": true,
+    "supportedAgents": ["codex", "opencode", "hermes", "pi"]
+  },
+  {
+    "id": "mistral",
+    "name": "Mistral",
+    "description": "Mistral AI models.",
+    "kind": "openai",
+    "baseUrl": "https://api.mistral.ai/v1",
+    "deployment": "cloud",
+    "defaultModel": "mistral-large-latest",
+    "opencodeNative": true,
+    "supportedAgents": ["codex", "opencode", "hermes", "pi"]
+  },
+  {
+    "id": "together",
+    "name": "Together AI",
+    "description": "Hosted open-source models on Together's API.",
+    "kind": "openai",
+    "baseUrl": "https://api.together.xyz/v1",
+    "deployment": "cloud",
+    "defaultModel": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "opencodeNative": true,
+    "supportedAgents": ["codex", "opencode", "hermes", "pi"]
+  },
+  {
+    "id": "venice",
+    "name": "Venice AI",
+    "description": "Privacy-focused, OpenAI-compatible API with uncensored models.",
+    "kind": "openai",
+    "baseUrl": "https://api.venice.ai/api/v1",
+    "deployment": "cloud",
+    "defaultModel": "venice-uncensored",
+    "opencodeNative": true,
+    "supportedAgents": ["codex", "opencode", "hermes", "pi"]
+  },
+  {
+    "id": "openrouter",
+    "name": "OpenRouter",
+    "description": "OpenAI- and Anthropic-compatible gateway to 400+ models with one API key.",
+    "kind": "openai",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "deployment": "cloud",
+    "defaultModel": "anthropic/claude-sonnet-4-6",
+    "opencodeNative": true,
+    "supportedAgents": ["claude", "codex", "opencode", "hermes", "pi"],
+    "routes": {
+      "openai": {
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "defaultModel": "anthropic/claude-sonnet-4-6",
+        "curatedModels": [
+          { "id": "anthropic/claude-sonnet-4-6", "name": "Claude Sonnet 4.6" },
+          { "id": "anthropic/claude-opus-4-6", "name": "Claude Opus 4.6" },
+          { "id": "openai/gpt-4o", "name": "GPT-4o" }
+        ]
+      },
+      "anthropic": {
+        "baseUrl": "https://openrouter.ai/api",
+        "defaultModel": "anthropic/claude-sonnet-4-6",
+        "curatedModels": [
+          { "id": "anthropic/claude-sonnet-4-6", "name": "Claude Sonnet 4.6" },
+          { "id": "anthropic/claude-opus-4-6", "name": "Claude Opus 4.6" },
+          { "id": "anthropic/claude-haiku-4-5", "name": "Claude Haiku 4.5" }
+        ],
+        "claudeModels": {
+          "model": "anthropic/claude-sonnet-4-6",
+          "sonnet": "anthropic/claude-sonnet-4-6",
+          "opus": "anthropic/claude-opus-4-6",
+          "haiku": "anthropic/claude-haiku-4-5",
+          "subagent": "anthropic/claude-haiku-4-5"
+        }
+      }
+    }
+  }
+]

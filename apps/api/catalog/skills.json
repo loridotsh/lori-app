@@ -1,0 +1,14 @@
+[
+  {
+    "id": "prisma-workflows",
+    "name": "Prisma workflows",
+    "description": "Database migrations, schema conventions, and everyday Prisma commands.",
+    "content": "---\nname: prisma-workflows\ndescription: Use when working with Prisma schemas, migrations, or database commands.\n---\n\n# Prisma workflows\n\n- Run `prisma migrate dev` for local schema changes.\n- Use `prisma db push` only for prototypes.\n- Always review generated SQL before applying to production.\n"
+  },
+  {
+    "id": "render-deploy",
+    "name": "Render deploy",
+    "description": "Deploy and troubleshoot apps on Render.",
+    "content": "---\nname: render-deploy\ndescription: Use when deploying or debugging apps on Render.\n---\n\n# Render deploy\n\n- Bind HTTP servers to `0.0.0.0:$PORT`.\n- Treat the filesystem as ephemeral; use a database or object storage.\n- Prefer `render.yaml` Blueprints for multi-service apps.\n"
+  }
+]

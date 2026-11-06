@@ -1,0 +1,146 @@
+[
+  {
+    "id": "notion",
+    "name": "Notion",
+    "description": "Search knowledge, read pages, and organize your workspace.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "linear",
+    "name": "Linear",
+    "description": "Plan projects and work with issues, comments, and milestones.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "github",
+    "name": "GitHub",
+    "description": "Explore repositories, issues, pull requests, and team activity.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "slack",
+    "name": "Slack",
+    "description": "Find conversations and work with messages and canvases.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "asana",
+    "name": "Asana",
+    "description": "Coordinate tasks, projects, and shared plans.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "clickup",
+    "name": "ClickUp",
+    "description": "Find and organize tasks, docs, and workspace projects.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "miro",
+    "name": "Miro",
+    "description": "Read boards and turn ideas into shared plans and diagrams.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "intercom",
+    "name": "Intercom",
+    "description": "Read customer conversations and manage support work.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "sentry",
+    "name": "Sentry",
+    "description": "Investigate errors, performance, and project issues.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "exa",
+    "name": "Exa",
+    "description": "Search the web and gather source material for research.",
+    "type": "plugin",
+    "featured": false,
+    "requiresAuth": true
+  },
+  {
+    "id": "research",
+    "name": "Research",
+    "description": "Ground answers in relevant sources and clear evidence.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "documents",
+    "name": "Documents",
+    "description": "Create and revise useful Word documents.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "spreadsheets",
+    "name": "Spreadsheets",
+    "description": "Analyze data and build reliable workbooks.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "presentations",
+    "name": "Presentations",
+    "description": "Build clear presentations with verified layout.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "pdfs",
+    "name": "PDFs",
+    "description": "Read, produce, and verify PDF deliverables.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "meeting-preparation",
+    "name": "Meeting preparation",
+    "description": "Prepare agendas, context, and decision questions.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "knowledge-capture",
+    "name": "Knowledge capture",
+    "description": "Turn evidence into linked notes and decisions.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  },
+  {
+    "id": "project-planning",
+    "name": "Project planning",
+    "description": "Translate goals into practical plans and tasks.",
+    "type": "skill",
+    "featured": false,
+    "requiresAuth": false
+  }
+]

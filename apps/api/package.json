@@ -1,0 +1,38 @@
+{
+  "name": "@lori-enterprise/api",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "admin:reset": "tsx src/auth/admin-reset.ts",
+    "owner:assign": "tsx src/auth/owner-assign.ts",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "start:migrate": "node dist/db/migrate.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@lori-enterprise/contracts": "0.1.2",
+    "ajv": "^8.20.0",
+    "better-auth": "1.6.25",
+    "fastify": "^5.12.6",
+    "minisearch": "^7.2.0",
+    "onnxruntime-node": "1.31.1",
+    "pg": "^8.0.0",
+    "re2-wasm": "^1.0.2",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.12"
+  }
+}
