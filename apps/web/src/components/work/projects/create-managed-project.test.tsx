@@ -1,0 +1,31 @@
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import type * as ApiModule from "@/lib/cloud-work-api";
+import { cloudApi } from "@/lib/cloud-work-api";
+import { ClientApiError } from "@/lib/client-api";
+import { CreateManagedProject } from "./create-managed-project";
+vi.mock("@/lib/cloud-work-api", async original => ({ ...await original<typeof ApiModule>(), cloudApi: vi.fn() }));
+beforeEach(() => vi.resetAllMocks()); afterEach(cleanup);
+it("reuses the existing creation API and retains its identity after an uncertain result", async () => {
+  const onCreated = vi.fn();
+  vi.mocked(cloudApi).mockRejectedValueOnce(new ClientApiError("network_unavailable", "Connection lost", 0)).mockResolvedValueOnce({ id: "created" });
+  render(<CreateManagedProject open allowed onClose={vi.fn()} onCreated={onCreated} />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Project name" }), { target: { value: "Admin workspace" } });
+  fireEvent.change(screen.getByRole("textbox", { name: "Description" }), { target: { value: "Project context" } });
+  fireEvent.click(screen.getByRole("button", { name: "Create project" }));
+  await screen.findByRole("alert");
+  expect((screen.getByRole("textbox", { name: "Project name" }) as HTMLInputElement).disabled).toBe(true);
+  const first = vi.mocked(cloudApi).mock.calls[0]!;
+  expect(first[0]).toBe("/projects");
+  const body = JSON.parse(String(first[1]?.body));
+  expect(body).toMatchObject({ name: "Admin workspace", description: "Project context", instructions: "" });
+  expect(body).not.toHaveProperty("templateId");
+  fireEvent.click(screen.getByRole("button", { name: "Retry creation" }));
+  await waitFor(() => expect(onCreated).toHaveBeenCalledWith({ id: "created" }));
+  expect(vi.mocked(cloudApi).mock.calls[1]![1]?.body).toBe(first[1]?.body);
+});
+it("does not create a project when creation authority is absent", () => {
+  render(<CreateManagedProject open allowed={false} onClose={vi.fn()} onCreated={vi.fn()} />);
+  expect((screen.getByRole("button", { name: "Create project" }) as HTMLButtonElement).disabled).toBe(true);
+  expect(cloudApi).not.toHaveBeenCalled();
+});
