@@ -1,0 +1,19 @@
+services:
+  admin-reset:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:7c9b289420248303ea907fec19d7335da57f3546b4590357c199e12fc1e7a00a
+    pull_policy: always
+  owner-assign:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:7c9b289420248303ea907fec19d7335da57f3546b4590357c199e12fc1e7a00a
+    pull_policy: always
+  migrate:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:7c9b289420248303ea907fec19d7335da57f3546b4590357c199e12fc1e7a00a
+    pull_policy: always
+  api:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:7c9b289420248303ea907fec19d7335da57f3546b4590357c199e12fc1e7a00a
+    pull_policy: always
+  web:
+    image: ghcr.io/loridotsh/lori-enterprise-web@sha256:13bde37af0d55d5dcc978aacfb153904caf3a9a375234e4c78b1aba6b629f875
+    pull_policy: always
+  work-worker:
+    image: ghcr.io/loridotsh/lori-enterprise-work-worker@sha256:cb72a1053f0677ccbf7985f0573e93ad295e0902f2cfcaf21546e4f9723826f2
+    pull_policy: always

@@ -1,0 +1,512 @@
+name: lori-enterprise
+
+x-api-image: &api-image
+  image: ${LORI_ENTERPRISE_API_IMAGE:-lori-enterprise-api:${LORI_VERSION:-local}}
+
+x-database-environment: &database-environment
+  DATABASE_HOST: database
+  DATABASE_NAME: lori_enterprise
+  DATABASE_PASSWORD_FILE: /run/lori-database/postgres-password
+  DATABASE_PORT: "5432"
+  DATABASE_SSL: disable
+  DATABASE_USER: lori
+  NODE_ENV: production
+
+x-api-environment: &api-environment
+  <<: *database-environment
+  BETTER_AUTH_SECRET_FILE: /run/lori-app/better-auth-secret
+  LORI_ADDRESS: ${LORI_ADDRESS:-http://localhost}
+  LORI_PUBLIC_SIGNUP: ${LORI_PUBLIC_SIGNUP:-false}
+  PROVIDER_GATEWAY_SECRET_FILE: /run/lori-app/provider-gateway-secret
+  SETUP_TOKEN_FILE: /run/lori-setup/current/setup-token
+  SETUP_TOKEN_CREATED_AT_FILE: /run/lori-setup/current/setup-token-created-at
+  SERVER_VERSION: ${LORI_VERSION:-local}
+  TRUST_PROXY: "true"
+
+services:
+  bootstrap:
+    image: node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+    restart: "no"
+    command:
+      - node
+      - -e
+      - |
+        const { randomBytes, randomUUID } = require("node:crypto");
+        const { chmodSync, chownSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, symlinkSync, unlinkSync, writeFileSync } = require("node:fs");
+        const { dirname } = require("node:path");
+        const legacy = "/run/lori-secrets";
+        const read = (path) => existsSync(path) ? readFileSync(path, "utf8").trim() : null;
+        for (const name of ["instance-id", "instance-private-key"]) {
+          const obsoletePath = legacy + "/" + name;
+          if (existsSync(obsoletePath)) unlinkSync(obsoletePath);
+        }
+        const write = (path, value, mode, uid = 0, gid = 0) => {
+          mkdirSync(dirname(path), { recursive: true });
+          const temporary = path + "." + randomUUID() + ".tmp";
+          writeFileSync(temporary, value + "\n", { flag: "wx", mode: 0o600 });
+          chmodSync(temporary, mode);
+          chownSync(temporary, uid, gid);
+          renameSync(temporary, path);
+        };
+        const syncSecret = (name, destination, bytes, mode, uid) => {
+          const legacyPath = legacy + "/" + name;
+          const oldValue = read(legacyPath);
+          const currentValue = read(destination);
+          if (oldValue && currentValue && oldValue !== currentValue) {
+            throw new Error(name + " differs between legacy and isolated secret volumes");
+          }
+          const value = currentValue || oldValue || randomBytes(bytes).toString("base64url");
+          if (value.length < 32) throw new Error(name + " is unexpectedly short");
+          if (!currentValue) write(destination, value, mode, uid);
+          if (!oldValue) write(legacyPath, value, 0o444);
+        };
+        syncSecret("postgres-password", "/run/lori-database/postgres-password", 48, 0o444, 0);
+        syncSecret("better-auth-secret", "/run/lori-app/better-auth-secret", 48, 0o440, 1000);
+        syncSecret("provider-gateway-secret", "/run/lori-app/provider-gateway-secret", 48, 0o440, 1000);
+        syncSecret("work-cloud-worker-secret", "/run/lori-work-cloud/worker-secret", 48, 0o444, 0);
+        if (!read("/run/lori-database-runtime/password")) write("/run/lori-database-runtime/password", randomBytes(48).toString("base64url"), 0o440, 1000);
+        if (!read("/run/lori-project-content/keyring.json")) write("/run/lori-project-content/keyring.json", JSON.stringify({ active: "initial", keys: { initial: randomBytes(32).toString("base64url") } }), 0o440, 1000);
+        mkdirSync("/var/lib/lori/work-cloud", { recursive: true, mode: 0o700 });
+        const cloudFiles = statSync("/var/lib/lori/work-cloud");
+        if (cloudFiles.uid !== 1000 || cloudFiles.gid !== 1000 || (cloudFiles.mode & 0o777) !== 0o700) {
+          chownSync("/var/lib/lori/work-cloud", 0, 0);
+          chmodSync("/var/lib/lori/work-cloud", 0o700);
+          chownSync("/var/lib/lori/work-cloud", 1000, 1000);
+        }
+
+        const syncPair = (root, names, createValues, validate) => {
+          const currentPaths = names.map((name) => root + "/current/" + name);
+          const legacyPaths = names.map((name) => legacy + "/" + name);
+          const currentValues = currentPaths.map(read);
+          const legacyValues = legacyPaths.map(read);
+          const partial = (values) => values.some(Boolean) && !values.every(Boolean);
+          if (partial(currentValues) || partial(legacyValues)) {
+            throw new Error(names.join("/") + " state is incomplete; restore the matching files from backup");
+          }
+          if (currentValues.every(Boolean) && legacyValues.every(Boolean) && currentValues.some((value, index) => value !== legacyValues[index])) {
+            throw new Error(names.join("/") + " differs between legacy and isolated secret volumes");
+          }
+          const values = currentValues.every(Boolean)
+            ? currentValues
+            : legacyValues.every(Boolean)
+              ? legacyValues
+              : createValues();
+          validate(values);
+          if (!currentValues.every(Boolean)) {
+            mkdirSync(root, { recursive: true });
+            const versionName = "state-" + randomUUID();
+            const versionDirectory = root + "/" + versionName;
+            mkdirSync(versionDirectory, { mode: 0o700 });
+            values.forEach((value, index) => write(versionDirectory + "/" + names[index], value, 0o440, 1000));
+            chmodSync(versionDirectory, 0o710);
+            chownSync(versionDirectory, 1000, 0);
+            const temporaryLink = root + "/.current-" + randomUUID();
+            symlinkSync(versionName, temporaryLink);
+            renameSync(temporaryLink, root + "/current");
+          }
+          values.forEach((value, index) => {
+            if (!legacyValues[index]) write(legacyPaths[index], value, 0o444);
+          });
+        };
+        syncPair(
+          "/run/lori-setup",
+          ["setup-token", "setup-token-created-at"],
+          () => [randomBytes(32).toString("base64url"), String(Date.now())],
+          ([token, createdAt]) => {
+            if (token.length < 32 || !Number.isInteger(Number(createdAt))) throw new Error("setup token state is invalid");
+          },
+        );
+    volumes:
+      - lori-secrets:/run/lori-secrets
+      - lori-database-secrets:/run/lori-database
+      - lori-app-secrets:/run/lori-app
+      - lori-setup-secrets:/run/lori-setup
+      - lori-work-cloud-secrets:/run/lori-work-cloud
+      - lori-work-cloud-files:/var/lib/lori/work-cloud
+      - lori-database-runtime-secrets:/run/lori-database-runtime
+      - lori-project-content-secrets:/run/lori-project-content
+    network_mode: none
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+
+  setup-token:
+    image: node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+    profiles:
+      - tools
+    restart: "no"
+    command:
+      - node
+      - -e
+      - |
+        const { readFileSync } = require("node:fs");
+        const createdAt = Number(readFileSync("/run/lori-setup/current/setup-token-created-at", "utf8").trim());
+        if (!Number.isInteger(createdAt) || Date.now() - createdAt >= 30 * 60 * 1000) {
+          throw new Error("The setup token has expired. Run: docker compose --profile tools run --rm setup-token-rotate");
+        }
+        process.stdout.write(readFileSync("/run/lori-setup/current/setup-token", "utf8").trim() + "\n");
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    volumes:
+      - lori-setup-secrets:/run/lori-setup:ro
+    network_mode: none
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  setup-token-rotate:
+    image: node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+    profiles:
+      - tools
+    restart: "no"
+    command:
+      - node
+      - -e
+      - |
+        const { randomBytes, randomUUID } = require("node:crypto");
+        const { chmodSync, chownSync, mkdirSync, renameSync, symlinkSync, writeFileSync } = require("node:fs");
+        const root = "/run/lori-setup";
+        const versionName = "state-" + randomUUID();
+        const versionDirectory = root + "/" + versionName;
+        mkdirSync(versionDirectory, { mode: 0o700 });
+        const token = randomBytes(32).toString("base64url");
+        const createdAt = String(Date.now());
+        for (const [name, value] of [["setup-token", token], ["setup-token-created-at", createdAt]]) {
+          const path = versionDirectory + "/" + name;
+          writeFileSync(path, value + "\n", { flag: "wx", mode: 0o600 });
+          chmodSync(path, 0o440);
+          chownSync(path, 1000, 0);
+        }
+        chmodSync(versionDirectory, 0o710);
+        chownSync(versionDirectory, 1000, 0);
+        const temporaryLink = root + "/.current-" + randomUUID();
+        symlinkSync(versionName, temporaryLink);
+        renameSync(temporaryLink, root + "/current");
+        for (const [name, value] of [["setup-token", token], ["setup-token-created-at", createdAt]]) {
+          const path = "/run/lori-secrets/" + name;
+          chmodSync(path, 0o600);
+          writeFileSync(path, value + "\n", { mode: 0o444 });
+          chmodSync(path, 0o444);
+        }
+        process.stdout.write(token + "\n");
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    volumes:
+      - lori-secrets:/run/lori-secrets
+      - lori-setup-secrets:/run/lori-setup
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+
+  admin-reset:
+    <<: *api-image
+    profiles:
+      - tools
+    restart: "no"
+    entrypoint: ["node", "apps/api/dist/auth/admin-reset.js"]
+    depends_on:
+      database:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment: *database-environment
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    volumes:
+      - lori-database-secrets:/run/lori-database:ro
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  owner-assign:
+    <<: *api-image
+    profiles:
+      - tools
+    restart: "no"
+    entrypoint: ["node", "apps/api/dist/auth/owner-assign.js"]
+    depends_on:
+      database:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment: *database-environment
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    volumes:
+      - lori-database-secrets:/run/lori-database:ro
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  database:
+    image: postgres:17-alpine@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+    restart: unless-stopped
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_DB: lori_enterprise
+      POSTGRES_PASSWORD_FILE: /run/lori-database/postgres-password
+      POSTGRES_USER: lori
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lori -d lori_enterprise"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    shm_size: 256mb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - lori-database-secrets:/run/lori-database:ro
+    networks:
+      - private
+
+  migrate:
+    <<: *api-image
+    restart: "no"
+    command: ["sh", "-c", "node apps/api/dist/db/migrate.js && node apps/api/dist/db/provision-runtime.js"]
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+    environment:
+      <<: *database-environment
+      DATABASE_RUNTIME_USER: lori_runtime
+      DATABASE_RUNTIME_PASSWORD_FILE: /run/lori-database-runtime/password
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    volumes:
+      - lori-database-secrets:/run/lori-database:ro
+      - lori-database-runtime-secrets:/run/lori-database-runtime:ro
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    <<: *api-image
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *api-environment
+      DATABASE_USER: lori_runtime
+      DATABASE_PASSWORD_FILE: /run/lori-database-runtime/password
+      WORK_CLOUD_PROJECTS_ENABLED: ${WORK_CLOUD_PROJECTS_ENABLED:-false}
+      WORK_CLOUD_DESKTOP_PROJECTS_ENABLED: ${WORK_CLOUD_DESKTOP_PROJECTS_ENABLED:-false}
+      WORK_CLOUD_PROJECT_KEYS_FILE: /run/lori-project-content/keyring.json
+      WORK_CLOUD_WORKER_SECRET_FILE: /run/lori-work-cloud/worker-secret
+      WORK_CLOUD_FILES_DIR: /var/lib/lori/work-cloud
+      WORK_CLOUD_WEB_RESEARCH_ENABLED: ${WORK_CLOUD_WEB_RESEARCH_ENABLED:-true}
+      WORK_CLOUD_RESEARCH_API_KEY: ${WORK_CLOUD_RESEARCH_API_KEY:-}
+      WORK_CLOUD_MODEL_LIMITS: ${WORK_CLOUD_MODEL_LIMITS:-}
+      WORK_CLOUD_APPROVAL_TIMEOUT_MINUTES: ${WORK_CLOUD_APPROVAL_TIMEOUT_MINUTES:-15}
+      WORK_CLOUD_PERSONAL_PROJECT_LIMIT: ${WORK_CLOUD_PERSONAL_PROJECT_LIMIT:-100}
+      WORK_CLOUD_PERSONAL_PROJECT_RECOVERY_DAYS: ${WORK_CLOUD_PERSONAL_PROJECT_RECOVERY_DAYS:-30}
+      LORI_SEMANTIC_MEMORY: ${LORI_SEMANTIC_MEMORY:-on}
+      LORI_SEMANTIC_THREADS: ${LORI_SEMANTIC_THREADS:-1}
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - lori-database-runtime-secrets:/run/lori-database-runtime:ro
+      - lori-project-content-secrets:/run/lori-project-content:ro
+      - lori-app-secrets:/run/lori-app:ro
+      - lori-setup-secrets:/run/lori-setup:ro
+      - lori-work-cloud-secrets:/run/lori-work-cloud:ro
+      - lori-work-cloud-files:/var/lib/lori/work-cloud
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  work-worker:
+    image: ${LORI_ENTERPRISE_WORKER_IMAGE:-lori-enterprise-work-worker:${LORI_VERSION:-local}}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      WORK_CLOUD_API_URL: http://api:4000
+      WORK_CLOUD_ALLOW_HTTP: "1"
+      WORK_CLOUD_REQUIRE_ISOLATION: "1"
+      WORK_CLOUD_WORKER_SECRET_FILE: /run/lori-work-cloud/worker-secret
+      WORK_CLOUD_DRAIN_SECONDS: "25"
+      WORK_CLOUD_WORKER_CONCURRENCY: ${WORK_CLOUD_WORKER_CONCURRENCY:-4}
+    read_only: true
+    init: true
+    stop_grace_period: 35s
+    mem_limit: ${LORI_WORKER_MEMORY_LIMIT:-2g}
+    pids_limit: 64
+    cpus: 1.0
+    tmpfs:
+      - /var/tmp/lori-work:size=256m,mode=1777,nr_inodes=8192
+    volumes:
+      - lori-work-cloud-secrets:/run/lori-work-cloud:ro
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    image: ${LORI_ENTERPRISE_WEB_IMAGE:-lori-enterprise-web:${LORI_VERSION:-local}}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      LORI_API_INTERNAL_URL: http://api:4000
+      NODE_ENV: production
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  edge:
+    image: caddy:2-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-eu", "-c"]
+    command:
+      - |
+        cat > /config/Caddyfile <<'EOF'
+        {
+          admin off
+          http_port ${LORI_HTTP_PORT:-80}
+          https_port ${LORI_HTTPS_PORT:-443}
+        }
+
+        ${LORI_ADDRESS:-http://localhost} {
+          encode zstd gzip
+
+          # Worker-only routes are reached over the private network, never
+          # through the public edge.
+          @internal path /api/v1/internal/*
+          handle @internal {
+            respond 404
+          }
+
+          @auth path /api/auth/*
+          handle @auth {
+            reverse_proxy api:4000
+          }
+
+          # Stream Cloud Work events without buffering.
+          @events path_regexp ^/api/v1/work/cloud/runs/[^/]+/events$$
+          handle @events {
+            uri strip_prefix /api
+            reverse_proxy api:4000 {
+              flush_interval -1
+            }
+          }
+
+          @api path /api/*
+          handle @api {
+            uri strip_prefix /api
+            reverse_proxy api:4000
+          }
+
+          handle {
+            reverse_proxy web:3000
+          }
+
+          header {
+            -Server
+            Permissions-Policy "camera=(), geolocation=(), microphone=()"
+            Referrer-Policy "strict-origin-when-cross-origin"
+            X-Content-Type-Options "nosniff"
+            X-Frame-Options "DENY"
+          }
+
+          log {
+            output stdout
+            format filter {
+              request>uri delete
+              request>headers>Authorization delete
+              request>headers>Cookie delete
+              request>headers>X-Api-Key delete
+              wrap json
+            }
+          }
+        }
+        EOF
+        exec caddy run --config /config/Caddyfile --adapter caddyfile
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    environment:
+      LORI_ADDRESS: ${LORI_ADDRESS:-http://localhost}
+    ports:
+      - target: ${LORI_HTTP_PORT:-80}
+        published: ${LORI_HTTP_PORT:-80}
+        protocol: tcp
+      - target: ${LORI_HTTPS_PORT:-443}
+        published: ${LORI_HTTPS_PORT:-443}
+        protocol: tcp
+      - target: ${LORI_HTTPS_PORT:-443}
+        published: ${LORI_HTTPS_PORT:-443}
+        protocol: udp
+    read_only: true
+    tmpfs:
+      - /config:size=16m,mode=0755
+      - /tmp:size=32m,mode=1777
+    volumes:
+      - caddy-data:/data
+    networks:
+      - private
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  private:
+    driver: bridge
+
+volumes:
+  caddy-data:
+  lori-app-secrets:
+  lori-database-secrets:
+  lori-database-runtime-secrets:
+  lori-project-content-secrets:
+  lori-secrets:
+  lori-setup-secrets:
+  lori-work-cloud-secrets:
+  lori-work-cloud-files:
+  postgres-data:

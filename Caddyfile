@@ -1,0 +1,60 @@
+{
+	admin off
+}
+
+{$LORI_ADDRESS:http://localhost} {
+	encode zstd gzip
+
+	# Worker-only routes are reached over the private network, never through
+	# the public edge.
+	@internal path /api/v1/internal/*
+	handle @internal {
+		respond 404
+	}
+
+	@auth path /api/auth/*
+	handle @auth {
+		reverse_proxy api:4000
+	}
+
+	# Stream Cloud Work events without buffering.
+	@events path_regexp ^/api/v1/work/cloud/runs/[^/]+/events$
+	handle @events {
+		uri strip_prefix /api
+		reverse_proxy api:4000 {
+			flush_interval -1
+		}
+	}
+
+	@api path /api/*
+	handle @api {
+		uri strip_prefix /api
+		reverse_proxy api:4000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+
+	header {
+		-Server
+		Permissions-Policy "camera=(), geolocation=(), microphone=()"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+	}
+
+	log {
+		output stdout
+		# Request URIs can contain invitation, enrollment, or malformed provider
+		# credentials. Keep useful method/status/timing fields while omitting the
+		# whole URI from access logs rather than trying to redact every spelling.
+		format filter {
+			request>uri delete
+			request>headers>Authorization delete
+			request>headers>Cookie delete
+			request>headers>X-Api-Key delete
+			wrap json
+		}
+	}
+}

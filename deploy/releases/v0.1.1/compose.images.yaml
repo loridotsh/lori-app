@@ -1,0 +1,18 @@
+# Digest-pinned API and web images for production Compose (no local build).
+# Release CI regenerates this file per version on each tag.
+services:
+  admin-reset:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:b12d67d80253ee3c1ca526458bb98588e255b5f0994f1c5cbc34604b550f1ff7
+    pull_policy: always
+
+  migrate:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:b12d67d80253ee3c1ca526458bb98588e255b5f0994f1c5cbc34604b550f1ff7
+    pull_policy: always
+
+  api:
+    image: ghcr.io/loridotsh/lori-enterprise-api@sha256:b12d67d80253ee3c1ca526458bb98588e255b5f0994f1c5cbc34604b550f1ff7
+    pull_policy: always
+
+  web:
+    image: ghcr.io/loridotsh/lori-enterprise-web@sha256:7c92b42f0a69629b62d8d6521a825581e8218a5bab549275611ca517a2746335
+    pull_policy: always

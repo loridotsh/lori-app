@@ -1,0 +1,8 @@
+# Used only by scripts/demo.mjs. Keep the demo reachable from this Mac only.
+services:
+  edge:
+    ports: !override
+      - target: ${LORI_HTTP_PORT:-8280}
+        published: ${LORI_HTTP_PORT:-8280}
+        host_ip: 127.0.0.1
+        protocol: tcp

@@ -1,0 +1,17 @@
+x-api-build: &api-build
+  context: .
+  dockerfile: apps/api/Dockerfile
+
+services:
+  api:
+    build: *api-build
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+
+  work-worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile

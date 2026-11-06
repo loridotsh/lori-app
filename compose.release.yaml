@@ -1,0 +1,24 @@
+services:
+  admin-reset:
+    image: ${LORI_ENTERPRISE_API_IMAGE:?Set LORI_ENTERPRISE_API_IMAGE to a digest-pinned release image}
+    pull_policy: always
+
+  owner-assign:
+    image: ${LORI_ENTERPRISE_API_IMAGE:?Set LORI_ENTERPRISE_API_IMAGE to a digest-pinned release image}
+    pull_policy: always
+
+  migrate:
+    image: ${LORI_ENTERPRISE_API_IMAGE:?Set LORI_ENTERPRISE_API_IMAGE to a digest-pinned release image}
+    pull_policy: always
+
+  api:
+    image: ${LORI_ENTERPRISE_API_IMAGE:?Set LORI_ENTERPRISE_API_IMAGE to a digest-pinned release image}
+    pull_policy: always
+
+  web:
+    image: ${LORI_ENTERPRISE_WEB_IMAGE:?Set LORI_ENTERPRISE_WEB_IMAGE to a digest-pinned release image}
+    pull_policy: always
+
+  work-worker:
+    image: ${LORI_ENTERPRISE_WORKER_IMAGE:?Set LORI_ENTERPRISE_WORKER_IMAGE to a digest-pinned release image}
+    pull_policy: always
