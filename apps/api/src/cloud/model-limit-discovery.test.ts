@@ -33,7 +33,7 @@ describe("priming limits from one listing", () => {
       { id: "gpt-6.1-terra", context_length: 922_000, max_output_tokens: 128_000 },
       { id: "claude-haiku-5.5", context_length: 1_000_000, max_output_tokens: 128_000 },
     ]);
-    expect(t.resolver.peek("0g", "gpt-6.1-terra", zeroG)).toMatchObject({ contextTokens: 922_000, outputTokens: 128_000, source: "provider" });
+    expect(t.resolver.peek("0g", "gpt-6.1-terra", zeroG)).toMatchObject({ contextTokens: 922_000, outputTokens: 32_768, source: "provider" });
     expect(t.resolver.peek("0g", "claude-haiku-5.5", zeroG).contextTokens).toBe(1_000_000);
     expect((await t.resolver.resolve(zeroG, "gpt-6.1-terra")).contextTokens).toBe(922_000);
     expect(t.fetcher).not.toHaveBeenCalled();
@@ -134,16 +134,20 @@ describe("0G reply limits", () => {
 
   it("uses the vendor's figure when 0G lists none, and the old estimate otherwise", () => {
     const limits = primed([{ id: "kimi-k2.6", context_length: 262_144 }, { id: "qwen-plus", context_length: 1_000_000 }]);
-    expect(limits.peek("0g", "kimi-k2.6", zeroG).outputTokens).toBe(131_072);
+    expect(limits.peek("0g", "kimi-k2.6", zeroG).outputTokens).toBe(32_768);
     expect(limits.peek("0g", "qwen-plus", zeroG).outputTokens).toBe(MAX_RESPONSE_TOKENS);
   });
   it("prefers 0G's own figure and always leaves half the window for input", () => {
     const limits = primed([
-      { id: "kimi-k2.6", context_length: 262_144, max_output_tokens: 32_768 },
-      { id: "glm-4.5", context_length: 131_072, max_output_tokens: 98_304 },
+      { id: "kimi-k2.6", context_length: 262_144, max_output_tokens: 20_000 },
+      { id: "qwen-max", context_length: 32_768, max_output_tokens: 30_000 },
     ]);
-    expect(limits.peek("0g", "kimi-k2.6", zeroG).outputTokens).toBe(32_768);
-    expect(limits.peek("0g", "glm-4.5", zeroG).outputTokens).toBe(65_536);
+    expect(limits.peek("0g", "kimi-k2.6", zeroG).outputTokens).toBe(20_000);
+    expect(limits.peek("0g", "qwen-max", zeroG).outputTokens).toBe(16_384);
+  });
+  it("never asks for more than the stream can carry, whatever a model lists", () => {
+    const limits = primed([{ id: "minimax-m3.1-flash", context_length: 1_000_000, max_output_tokens: 524_288 }]);
+    expect(limits.peek("0g", "minimax-m3.1-flash", zeroG).outputTokens).toBe(32_768);
   });
   it("keeps every other provider at the shared ceiling", () => {
     const direct = target("openrouter", "https://openrouter.ai/api/v1");
@@ -151,10 +155,16 @@ describe("0G reply limits", () => {
     t.resolver.prime(direct, [{ id: "large", context_length: 1_000_000, max_output_tokens: 128_000 }]);
     expect(t.resolver.peek("openrouter", "large", direct).outputTokens).toBe(MAX_RESPONSE_TOKENS);
   });
-  it("starts within a limit a provider stated", () => {
-    const limits = primed([{ id: "glm-5.3", context_length: 1_179_648, max_output_tokens: 131_072 }]);
-    limits.learnOutput("0g", "glm-5.3", 32_768, zeroG);
-    expect(limits.peek("0g", "glm-5.3", zeroG).outputTokens).toBe(32_768);
+  it("starts within a limit a provider stated, then tries the full limit again later", () => {
+    const t = resolver(() => json({ data: [] }));
+    t.resolver.prime(zeroG, [{ id: "glm-5.3", context_length: 1_179_648, max_output_tokens: 131_072 }]);
+    t.resolver.learnOutput("0g", "glm-5.3", 20_000, zeroG);
+    expect(t.resolver.peek("0g", "glm-5.3", zeroG).outputTokens).toBe(20_000);
+    t.tick(5 * 60 * 60 * 1000);
+    t.resolver.prime(zeroG, [{ id: "glm-5.3", context_length: 1_179_648, max_output_tokens: 131_072 }]);
+    t.tick(2 * 60 * 60 * 1000);
+    t.resolver.prime(zeroG, [{ id: "glm-5.3", context_length: 1_179_648, max_output_tokens: 131_072 }]);
+    expect(t.resolver.peek("0g", "glm-5.3", zeroG).outputTokens).toBe(32_768);
   });
   it("marks image and video models and gives them a window a long chat fits", () => {
     const limits = primed([{ id: "clip", category: "video", unitPrice: "$0.2 per second" }, { id: "chat", context_length: 1_000_000, category: "chat" }]);
@@ -177,6 +187,11 @@ describe("refused reply budgets", () => {
   it("ignores numbers outside the message and falls back to the shared ceiling", () => {
     const refusal = JSON.stringify({ error: { message: "max_tokens is too large" }, x_0g_trace: { request_id: "90000" } });
     expect(outputCeilingFromRefusal(refusal, 131_072)).toBe(MAX_RESPONSE_TOKENS);
+  });
+  it("takes only a number stated as a limit, not a code, a model name or the window", () => {
+    expect(outputCeilingFromRefusal('{"code":1214,"message":"max_tokens is too large"}', 131_072)).toBe(MAX_RESPONSE_TOKENS);
+    expect(outputCeilingFromRefusal("max_tokens too large for gpt-4-1106-preview", 131_072)).toBe(MAX_RESPONSE_TOKENS);
+    expect(outputCeilingFromRefusal("max_tokens must be at most 65536 (context window 200000)", 131_072)).toBe(65_536);
   });
 });
 

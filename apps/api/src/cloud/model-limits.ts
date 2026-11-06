@@ -14,9 +14,11 @@
 export const MAX_RESPONSE_TOKENS = 16_384;
 /**
  * The API replaces the worker's output budget on every provider request, and
- * 0G admits a request on a flat minimum, so its models get their real limit.
+ * 0G admits a request on a flat minimum, so its models may go past that. Not as
+ * far as they list: the stream is capped at 8 MiB and each token arrives in a
+ * frame of about 200 bytes, so this is the most a reply can reliably carry.
  */
-const RESPONSE_CEILINGS: Record<string, number> = { "0g": 524_288 };
+const RESPONSE_CEILINGS: Record<string, number> = { "0g": 32_768 };
 export const responseCeiling = (providerId: string): number =>
   Object.hasOwn(RESPONSE_CEILINGS, providerId) ? RESPONSE_CEILINGS[providerId]! : MAX_RESPONSE_TOKENS;
 /**
@@ -190,14 +192,22 @@ export function limitsFrom(
 
 /**
  * Input the planner may send: the context window less the response and the
- * same 10% safety margin the worker applies, so the two never disagree.
+ * same 10% safety margin the worker applies, so the two never disagree. Only
+ * the shared ceiling is held back: a model's full reply limit can be half its
+ * window, and reserving that would squeeze out the history a task needs.
  */
 export function inputTokenBudget(limits: ModelLimits): number {
   return (
     limits.contextTokens -
-    limits.outputTokens -
+    Math.min(limits.outputTokens, MAX_RESPONSE_TOKENS) -
     Math.floor(limits.contextTokens / 10)
   );
+}
+
+/** The reply a prompt leaves room for, since prompt and reply share one window. */
+export function replyTokenBudget(limits: ModelLimits, promptTokens: number): number {
+  const room = limits.contextTokens - Math.floor(limits.contextTokens / 10) - promptTokens;
+  return Math.max(1, Math.min(limits.outputTokens, room));
 }
 
 /**

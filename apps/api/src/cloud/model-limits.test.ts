@@ -6,6 +6,7 @@ import {
   inputTokenBudget,
   outputBudgetParams,
   parseModelLimitOverrides,
+  replyTokenBudget,
   resolveModelLimits,
 } from "./model-limits.js";
 
@@ -19,6 +20,15 @@ describe("resolveModelLimits", () => {
     });
     // Large enough that history is no longer cut off at the old ~10k budget.
     expect(inputTokenBudget(limits)).toBe(1_050_000 - 16_384 - 105_000);
+  });
+  it("keeps prompt room on a model whose reply limit is half its window", () => {
+    const limits = { contextTokens: 262_144, outputTokens: 131_072, source: "provider" as const };
+    expect(inputTokenBudget(limits)).toBe(262_144 - 16_384 - 26_214);
+  });
+  it("gives the reply whatever the prompt leaves, up to the model's limit", () => {
+    const limits = { contextTokens: 262_144, outputTokens: 131_072, source: "provider" as const };
+    expect(replyTokenBudget(limits, 10_000)).toBe(131_072);
+    expect(replyTokenBudget(limits, inputTokenBudget(limits))).toBe(16_384);
   });
   it("falls back to a conservative default for unknown, similarly named and other-provider models", () => {
     for (const [provider, model] of [

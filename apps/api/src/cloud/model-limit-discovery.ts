@@ -198,7 +198,15 @@ const OVERFLOW_PATTERNS = [
 export const refusesOutputBudget = (body: string): boolean =>
   /max[_ ]?(?:completion[_ ]|output[_ ])?tokens/i.test(body);
 
-/** The largest limit a budget refusal names, or the ceiling known to work everywhere. */
+const OUTPUT_LIMIT_PATTERNS = [
+  /\bin \[\s*\d+\s*,\s*(\d[\d,]*)\s*\]/i,
+  /\bbetween \d[\d,]* and (\d[\d,]*)/i,
+  /(?:at most|no more than|up to|less than or equal to|<=|maximum(?: value| allowed)?(?: is| of|:)?|max(?:imum)? is|limit(?: is| of)?|>)\s*(\d[\d,]*)/i,
+];
+/** A smaller number in a refusal is an error code or a model name, not a reply limit. */
+const MIN_OUTPUT_LIMIT = 4096;
+
+/** The limit a budget refusal states, or the ceiling known to work everywhere. */
 export function outputCeilingFromRefusal(body: string, requested: number): number {
   let message = body;
   try {
@@ -207,10 +215,11 @@ export function outputCeilingFromRefusal(body: string, requested: number): numbe
   } catch {
     // A plain-text refusal is read as it is.
   }
-  const named = [...message.matchAll(/\d[\d,]*/g)]
-    .map((match) => Number(match[0].replaceAll(",", "")))
-    .filter((value) => Number.isInteger(value) && value >= 1024 && value < requested);
-  return named.length ? Math.max(...named) : Math.min(MAX_RESPONSE_TOKENS, requested - 1);
+  for (const pattern of OUTPUT_LIMIT_PATTERNS) {
+    const value = Number(pattern.exec(message)?.[1]?.replaceAll(",", "") ?? NaN);
+    if (Number.isInteger(value) && value >= MIN_OUTPUT_LIMIT && value < requested) return value;
+  }
+  return Math.min(MAX_RESPONSE_TOKENS, requested - 1);
 }
 
 /** The window a provider's "too long" message names, or null when it names none we can trust. */
@@ -227,7 +236,7 @@ export function ceilingFromRefusal(body: string): number | null {
 export class ModelLimitResolver {
   private readonly found = new Map<string, { at: number; value: Found | null }>();
   private readonly learned = new Map<string, number>();
-  private readonly learnedOutput = new Map<string, number>();
+  private readonly learnedOutput = new Map<string, { at: number; value: number }>();
   private readonly inflight = new Map<string, Promise<Found | null>>();
   private readonly primedAt = new Map<string, number>();
 
@@ -290,7 +299,7 @@ export class ModelLimitResolver {
   /** Remembers a lower reply limit a provider stated, so later requests start within it. */
   learnOutput(providerId: string, modelId: string, ceiling: number, target?: LimitTarget) {
     if (this.learnedOutput.size >= 1024) this.learnedOutput.delete(this.learnedOutput.keys().next().value!);
-    this.learnedOutput.set(this.key(providerId, modelId, target), ceiling);
+    this.learnedOutput.set(this.key(providerId, modelId, target), { at: this.now(), value: ceiling });
   }
 
   /** Known limits are still current, so a page can show them while a listing refreshes. */
@@ -366,9 +375,10 @@ export class ModelLimitResolver {
       limits = limitsFrom(base.contextTokens, discovered.output, "provider", ceiling);
     }
     const key = this.key(providerId, modelId, target);
+    // Gateways route to different upstreams, so a stated limit is only held for a while.
     const learnedOutput = this.learnedOutput.get(key);
-    if (learnedOutput !== undefined && learnedOutput < limits.outputTokens)
-      limits = { ...limits, outputTokens: learnedOutput };
+    if (learnedOutput && this.now() - learnedOutput.at < FOUND_TTL_MS && learnedOutput.value < limits.outputTokens)
+      limits = { ...limits, outputTokens: learnedOutput.value };
     const learned = this.learned.get(key);
     return learned !== undefined && learned < limits.contextTokens
       ? limitsFrom(learned, limits.outputTokens, "learned", ceiling)
