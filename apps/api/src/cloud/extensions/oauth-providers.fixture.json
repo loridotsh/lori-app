@@ -1,0 +1,292 @@
+[
+  {
+    "id": "notion",
+    "resourceUrl": "https://mcp.notion.com/.well-known/oauth-protected-resource/mcp",
+    "resource": {
+      "resource": "https://mcp.notion.com/mcp",
+      "authorization_servers": [
+        "https://mcp.notion.com"
+      ],
+      "scopes_supported": [
+        "default"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ],
+      "resource_name": "Notion MCP (Beta)"
+    },
+    "metadataUrl": "https://mcp.notion.com/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://mcp.notion.com",
+      "authorization_endpoint": "https://mcp.notion.com/authorize",
+      "token_endpoint": "https://mcp.notion.com/token",
+      "registration_endpoint": "https://mcp.notion.com/register",
+      "token_endpoint_auth_methods_supported": [
+        "client_secret_basic",
+        "client_secret_post",
+        "none"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "linear",
+    "resourceUrl": "https://mcp.linear.app/.well-known/oauth-protected-resource/mcp",
+    "resource": {
+      "resource": "https://mcp.linear.app/mcp",
+      "authorization_servers": [
+        "https://mcp.linear.app"
+      ],
+      "scopes_supported": [
+        "read",
+        "write"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ]
+    },
+    "metadataUrl": "https://mcp.linear.app/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://mcp.linear.app",
+      "authorization_endpoint": "https://mcp.linear.app/authorize",
+      "token_endpoint": "https://mcp.linear.app/token",
+      "registration_endpoint": "https://mcp.linear.app/register",
+      "token_endpoint_auth_methods_supported": [
+        "client_secret_basic",
+        "client_secret_post",
+        "none"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "slack",
+    "resourceUrl": "https://mcp.slack.com/.well-known/oauth-protected-resource",
+    "resource": {
+      "resource": "https://mcp.slack.com",
+      "authorization_servers": [
+        "https://mcp.slack.com"
+      ],
+      "bearer_methods_supported": [
+        "header",
+        "form"
+      ],
+      "scopes_supported": [
+        "canvases:read",
+        "canvases:write",
+        "channels:history",
+        "channels:read",
+        "channels:write",
+        "chat:write",
+        "emoji:read",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "groups:read",
+        "groups:write",
+        "im:history",
+        "im:read",
+        "im:write",
+        "lists:read",
+        "lists:write",
+        "mpim:history",
+        "mpim:read",
+        "mpim:write",
+        "reactions:read",
+        "reactions:write",
+        "search:read.files",
+        "search:read.im",
+        "search:read.mpim",
+        "search:read.private",
+        "search:read.public",
+        "search:read.users",
+        "users:read",
+        "users:read.email"
+      ],
+      "resource_name": "Slack API",
+      "resource_documentation": "https://api.slack.com",
+      "tls_client_certificate_bound_access_tokens": false
+    },
+    "metadataUrl": "https://mcp.slack.com/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://mcp.slack.com",
+      "authorization_endpoint": "https://slack.com/oauth/v2_user/authorize",
+      "token_endpoint": "https://slack.com/api/oauth.v2.user.access",
+      "token_endpoint_auth_methods_supported": [
+        "client_secret_post"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "asana",
+    "resourceUrl": "https://mcp.asana.com/.well-known/oauth-protected-resource/v2",
+    "resource": {
+      "resource": "https://mcp.asana.com/v2/mcp",
+      "authorization_servers": [
+        "https://app.asana.com"
+      ],
+      "scopes_supported": [
+        "default"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ],
+      "resource_documentation": "https://developers.asana.com/docs/using-asanas-mcp-server",
+      "resource_name": "Asana MCP"
+    },
+    "metadataUrl": "https://app.asana.com/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://app.asana.com",
+      "authorization_endpoint": "https://app.asana.com/-/oauth_authorize",
+      "token_endpoint": "https://app.asana.com/-/oauth_token",
+      "token_endpoint_auth_methods_supported": [
+        "client_secret_post",
+        "client_secret_basic"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "clickup",
+    "resourceUrl": "https://mcp.clickup.com/.well-known/oauth-protected-resource/mcp",
+    "resource": {
+      "resource": "https://mcp.clickup.com/mcp",
+      "resource_name": "ClickUp MCP Server",
+      "resource_description": "API for managing ClickUp tasks, documents, and chat via MCP.",
+      "resource_type": "api",
+      "resource_owner": "ClickUp",
+      "resource_owner_url": "https://mcp.clickup.com",
+      "resource_server_origin": "https://api.clickup.com",
+      "authorization_servers": [
+        "https://mcp.clickup.com"
+      ],
+      "scopes_supported": [
+        "read",
+        "write"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ],
+      "resource_indicators_supported": true
+    },
+    "metadataUrl": "https://mcp.clickup.com/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://mcp.clickup.com",
+      "authorization_endpoint": "https://mcp.clickup.com/oauth/authorize",
+      "token_endpoint": "https://mcp.clickup.com/oauth/token",
+      "registration_endpoint": "https://mcp.clickup.com/oauth/register",
+      "token_endpoint_auth_methods_supported": [
+        "none"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "miro",
+    "resourceUrl": "https://mcp.miro.com/.well-known/oauth-protected-resource",
+    "resource": {
+      "resource": "https://mcp.miro.com/",
+      "authorization_servers": [
+        "https://mcp.miro.com/"
+      ],
+      "scopes_supported": [
+        "boards:read",
+        "boards:write",
+        "openid",
+        "email"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ]
+    },
+    "metadataUrl": "https://mcp.miro.com/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://mcp.miro.com/",
+      "authorization_endpoint": "https://mcp.miro.com/authorize",
+      "token_endpoint": "https://mcp.miro.com/token",
+      "registration_endpoint": "https://mcp.miro.com/register",
+      "token_endpoint_auth_methods_supported": [
+        "client_secret_post",
+        "client_secret_basic"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "sentry",
+    "resourceUrl": "https://mcp.sentry.dev/.well-known/oauth-protected-resource/mcp",
+    "resource": {
+      "resource": "https://mcp.sentry.dev/mcp",
+      "authorization_servers": [
+        "https://mcp.sentry.dev"
+      ],
+      "scopes_supported": [
+        "org:read",
+        "project:write",
+        "team:write",
+        "event:write",
+        "alerts:write"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ]
+    },
+    "metadataUrl": "https://mcp.sentry.dev/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://mcp.sentry.dev",
+      "authorization_endpoint": "https://mcp.sentry.dev/oauth/authorize",
+      "token_endpoint": "https://mcp.sentry.dev/oauth/token",
+      "registration_endpoint": "https://mcp.sentry.dev/oauth/register",
+      "token_endpoint_auth_methods_supported": [
+        "client_secret_basic",
+        "client_secret_post",
+        "none"
+      ],
+      "code_challenge_methods_supported": [
+        "S256"
+      ]
+    }
+  },
+  {
+    "id": "exa",
+    "resourceUrl": "https://mcp.exa.ai/.well-known/oauth-protected-resource/mcp",
+    "resource": {
+      "resource": "https://mcp.exa.ai/mcp",
+      "authorization_servers": [
+        "https://auth.exa.ai"
+      ],
+      "scopes_supported": [
+        "mcp:tools"
+      ],
+      "bearer_methods_supported": [
+        "header"
+      ]
+    },
+    "metadataUrl": "https://auth.exa.ai/.well-known/oauth-authorization-server",
+    "metadata": {
+      "issuer": "https://auth.exa.ai",
+      "authorization_endpoint": "https://auth.exa.ai/oauth/authorize",
+      "token_endpoint": "https://auth.exa.ai/api/oauth/token",
+      "registration_endpoint": "https://auth.exa.ai/api/oauth/register",
+      "code_challenge_methods_supported": [
+        "S256"
+      ],
+      "token_endpoint_auth_methods_supported": [
+        "none"
+      ]
+    }
+  }
+]
