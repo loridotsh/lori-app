@@ -6,12 +6,19 @@ import { Readable, Transform } from "node:stream";
 import { z } from "zod";
 import { IdentityError } from "../auth/identity-service.js";
 import { workCredentialRedactor } from "../auth/provider-gateway-routes.js";
+import { setTimeout as delay } from "node:timers/promises";
 import {
+  hasImages,
+  imagesDisabledFor,
   reasoningDisabledFor,
+  rejectsImages,
   rejectsReasoningWithTools,
+  rememberImagesDisabled,
   rememberReasoningDisabled,
+  withoutImages,
   withReasoningDisabled,
 } from "./provider-compat.js";
+import { providerStreamRepair } from "./provider-stream.js";
 import {
   MAX_RESPONSE_TOKENS,
   outputBudgetParams,
@@ -48,6 +55,11 @@ const RunParams = z.object({ id: Id }).strict();
 const Cursor = z.coerce.number().int().min(0).max(2147483647);
 const Empty = z.object({}).strict();
 const ROOT = "/v1/work/cloud";
+/** A long wait for headers is normal: reasoning models think before they answer. */
+const PROVIDER_HEADERS_TIMEOUT_MS = 10 * 60 * 1000;
+/** Passing failures, retried before any byte reaches the member. */
+const RETRYABLE_STATUS = new Set([408, 429, 500, 502, 503, 504]);
+const RETRY_DELAYS_MS = [1000, 3000];
 const INTERNAL = "/v1/internal/work/cloud";
 export function registerCloudWorkRoutes(
   app: FastifyInstance,
@@ -648,25 +660,53 @@ export function registerCloudWorkRoutes(
           stream.once("close", cleanup);
           return reply.send(stream);
         }
-        const sendUpstream = (payload: Record<string, unknown>) =>
-          fetch(endpoint, {
-            method: "POST",
-            body: JSON.stringify(payload),
-            headers,
-            redirect: "manual",
-            signal: AbortSignal.any([
-              controller.signal,
-              AbortSignal.timeout(10 * 60 * 1000),
-            ]),
-          });
+        // Bounds only the wait for headers: a long reply keeps streaming past it,
+        // and providerStreamRepair watches for a stream that has gone quiet.
+        const requestUpstream = async (payload: Record<string, unknown>) => {
+          const waiting = new AbortController();
+          const timer = setTimeout(() => waiting.abort(), PROVIDER_HEADERS_TIMEOUT_MS);
+          try {
+            return await fetch(endpoint, {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers,
+              redirect: "manual",
+              signal: AbortSignal.any([controller.signal, waiting.signal]),
+            });
+          } finally {
+            clearTimeout(timer);
+          }
+        };
         const withTools = Array.isArray(body.tools) && body.tools.length > 0;
         const reasoningMatters = target.protocol === "openai" && withTools;
-        const withKnownReasoning = (payload: Record<string, unknown>) =>
-          reasoningMatters &&
-          reasoningDisabledFor(target.providerId, run.model_id)
-            ? withReasoningDisabled(payload)
-            : payload;
-        let response = await sendUpstream(withKnownReasoning(body));
+        const textOnly = listing.find((model) => model.id === run.model_id)?.imageInput === false;
+        const adapted = (payload: Record<string, unknown>) => {
+          const reasoned =
+            reasoningMatters && reasoningDisabledFor(target.providerId, run.model_id)
+              ? withReasoningDisabled(payload)
+              : payload;
+          return textOnly || imagesDisabledFor(target.gatewayId, run.model_id)
+            ? withoutImages(reasoned)
+            : reasoned;
+        };
+        const sendUpstream = async (payload: Record<string, unknown>) => {
+          for (const wait of RETRY_DELAYS_MS) {
+            try {
+              const answer = await requestUpstream(adapted(payload));
+              if (!RETRYABLE_STATUS.has(answer.status)) return answer;
+              await answer.body?.cancel().catch(() => {});
+            } catch (error) {
+              if (controller.signal.aborted) throw error;
+            }
+            req.log.info(
+              { runId: run.id, providerId: target.providerId, modelId: run.model_id },
+              "Retrying a passing Cloud provider failure",
+            );
+            await delay(wait, undefined, { signal: controller.signal });
+          }
+          return requestUpstream(adapted(payload));
+        };
+        let response = await sendUpstream(body);
         let refusal: string | undefined;
         if (!response.ok && response.body) {
           refusal = await readProviderRefusal(response);
@@ -690,7 +730,25 @@ export function registerCloudWorkRoutes(
               ...body,
               ...outputBudgetParams(target.protocol, target.providerId, ceiling),
             };
-            response = await sendUpstream(withKnownReasoning(body));
+            response = await sendUpstream(body);
+            refusal =
+              !response.ok && response.body
+                ? await readProviderRefusal(response)
+                : undefined;
+          }
+          // A text-only model refuses tool results that carry page images. Retry
+          // once with a note in their place, and remember it for later rounds.
+          if (
+            (response.status === 400 || response.status === 422) &&
+            hasImages(adapted(body)) &&
+            rejectsImages(refusal ?? "")
+          ) {
+            rememberImagesDisabled(target.gatewayId, run.model_id);
+            req.log.info(
+              { runId: run.id, providerId: target.providerId, modelId: run.model_id },
+              "Retrying Cloud provider request without images",
+            );
+            response = await sendUpstream(body);
             refusal =
               !response.ok && response.body
                 ? await readProviderRefusal(response)
@@ -710,7 +768,7 @@ export function registerCloudWorkRoutes(
               { runId: run.id, providerId: target.providerId, modelId: run.model_id },
               "Retrying Cloud provider request with reasoning off for tool use",
             );
-            response = await sendUpstream(withReasoningDisabled(body));
+            response = await sendUpstream(body);
             refusal =
               !response.ok && response.body
                 ? await readProviderRefusal(response)
@@ -794,11 +852,13 @@ export function registerCloudWorkRoutes(
         const redacted = workCredentialRedactor(target.apiKey, {
           terminateEvents: true,
         });
+        const repair = providerStreamRepair({ onStalled: () => controller.abort() });
         let bytes = 0;
         const bounded = new Transform({
           transform(chunk: Buffer, _encoding, callback) {
             bytes += chunk.length;
             if (bytes > 8 * 1048576) {
+              void cloud.recordProviderFailure(run.id, "provider_response_too_large").catch(() => {});
               callback(new Error("Cloud provider stream exceeded limit"));
               controller.abort();
             } else callback(null, chunk);
@@ -812,6 +872,7 @@ export function registerCloudWorkRoutes(
         );
         bounded.once("close", () => {
           source.destroy();
+          repair.destroy();
           redacted.destroy();
           cleanup();
         });
@@ -827,8 +888,8 @@ export function registerCloudWorkRoutes(
             bounded.destroy(new Error("Cloud usage persistence failed")),
           );
           bounded.once("close", () => observer.destroy());
-          source.pipe(observer).pipe(redacted).pipe(bounded);
-        } else source.pipe(redacted).pipe(bounded);
+          source.pipe(observer).pipe(repair).pipe(redacted).pipe(bounded);
+        } else source.pipe(repair).pipe(redacted).pipe(bounded);
         return reply.send(bounded);
       } catch (error) {
         // Read before cleanup(), which aborts the controller itself.
