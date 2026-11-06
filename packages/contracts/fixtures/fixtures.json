@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "title": "A clearer view of your launch",
+  "summary": "An illustrative launch scenario. Explore the monthly trend, compare plans, and adjust the assumptions to see how revenue changes.",
+  "blocks": [
+    { "type": "metrics", "title": "At a glance", "items": [
+      { "label": "Starting customers", "value": "120", "detail": "Illustrative starting point" },
+      { "label": "Monthly price", "value": "₹800", "detail": "Before taxes and operating costs" }
+    ] },
+    { "type": "chart", "title": "Two paths to growth", "chartType": "line", "xLabel": "Month", "yLabel": "Customers", "labels": ["April", "May", "June", "July", "August", "September"], "series": [
+      { "name": "Steady", "values": [120, 138, 159, 183, 210, 241] },
+      { "name": "Faster", "values": [120, 150, 188, 235, 294, 368] }
+    ] },
+    { "type": "calculator", "title": "Explore the monthly revenue", "inputs": [
+      { "id": "customers", "label": "Customers", "min": 0, "max": 1000, "step": 10, "value": 120 },
+      { "id": "price", "label": "Monthly price", "min": 100, "max": 2000, "step": 50, "value": 800, "unit": "INR" }
+    ], "outputs": [
+      { "label": "Monthly revenue", "expression": "customers * price", "unit": "INR", "precision": 0 },
+      { "label": "Annualized revenue", "expression": "customers * price * 12", "unit": "INR", "precision": 0 }
+    ], "note": "Customers × monthly price. Annualized revenue assumes the same customer count for 12 months; it is not a forecast." },
+    { "type": "table", "title": "Compare your options", "columns": ["Plan", "Price (INR)", "Best for"], "rows": [
+      ["Starter", 400, "Trying the product"], ["Team", 800, "A growing team"], ["Business", 1600, "Established workflows"]
+    ] },
+    { "type": "steps", "title": "How to read this scenario", "items": [
+      { "title": "Start with your assumptions", "text": "Set a customer count and monthly price that match your own evidence." },
+      { "title": "Compare the growth paths", "text": "Inspect each month and toggle a series to focus on one scenario. These values are illustrative." },
+      { "title": "Review the limitations", "text": "Revenue is not profit. Account for churn, taxes, and operating costs before making a decision." }
+    ] }
+  ]
+}

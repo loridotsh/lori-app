@@ -1,0 +1,17 @@
+[
+  { "name": "unknown slide layout", "path": ["blocks", 0, "slides", 0, "layout"], "value": "video" },
+  { "name": "bullets layout without bullets", "path": ["blocks", 0, "slides", 3, "layout"], "value": "statement" },
+  { "name": "stats layout missing stats", "path": ["blocks", 0, "slides", 0, "layout"], "value": "stats" },
+  { "name": "bullets on a title slide", "path": ["blocks", 0, "slides", 0, "bullets"], "value": ["Hidden"] },
+  { "name": "too many bullets", "path": ["blocks", 0, "slides", 3, "bullets"], "value": ["1", "2", "3", "4", "5", "6", "7"] },
+  { "name": "mismatched slide chart data", "path": ["blocks", 0, "slides", 2, "chart", "series", 0, "values"], "value": [1, 2] },
+  { "name": "duplicate slide chart series", "path": ["blocks", 0, "slides", 2, "chart", "series"], "value": [{ "name": "Revenue", "values": [1, 2, 3] }, { "name": "Revenue", "values": [3, 2, 1] }] },
+  { "name": "single slide column", "path": ["blocks", 0, "slides", 4, "columns"], "value": [{ "heading": "Only", "text": "One column" }] },
+  { "name": "slide markup property", "path": ["blocks", 0, "slides", 0, "html"], "value": "<b>x</b>" },
+  { "name": "slide image URL", "path": ["blocks", 0, "slides", 0, "image"], "value": "https://example.com/a.png" },
+  { "name": "blank slide title", "path": ["blocks", 0, "slides", 1, "title"], "value": "   " },
+  { "name": "empty report", "path": ["blocks", 1, "sections"], "value": [] },
+  { "name": "blank report body", "path": ["blocks", 1, "sections", 0, "body"], "value": "  " },
+  { "name": "rationales do not match options", "path": ["blocks", 2, "questions", 0, "rationales"], "value": ["One", "Two"] },
+  { "name": "blank quiz hint", "path": ["blocks", 2, "questions", 0, "hint"], "value": " " }
+]

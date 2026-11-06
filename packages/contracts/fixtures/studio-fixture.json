@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "title": "Quarterly business review",
+  "summary": "A briefing deck, written report and practice quiz for the Q3 review. Example material for product verification.",
+  "sources": [
+    {
+      "label": "Q3 finance pack",
+      "reference": "q3-finance.xlsx · sheet Summary"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slides",
+      "title": "Q3 in review",
+      "slides": [
+        {
+          "layout": "title",
+          "kicker": "Quarterly business review",
+          "title": "Growth held while costs fell",
+          "subtitle": "Q3 results and the plan for Q4",
+          "notes": "Open with the headline: revenue grew for a third straight quarter."
+        },
+        {
+          "layout": "stats",
+          "title": "Revenue up, churn down",
+          "stats": [
+            { "value": "$4.2M", "label": "Revenue", "detail": "+18% quarter on quarter" },
+            { "value": "2.1%", "label": "Monthly churn", "detail": "Down from 3.4%" },
+            { "value": "61%", "label": "Gross margin" }
+          ]
+        },
+        {
+          "layout": "chart",
+          "title": "Revenue grew every month",
+          "chart": {
+            "chartType": "bar",
+            "labels": ["Jul", "Aug", "Sep"],
+            "series": [{ "name": "Revenue", "values": [1.2, 1.4, 1.6] }],
+            "unit": "$M"
+          }
+        },
+        {
+          "layout": "bullets",
+          "title": "Three priorities for Q4",
+          "bullets": ["Expand the enterprise tier", "Ship self-serve onboarding", "Hold support costs flat"]
+        },
+        {
+          "layout": "columns",
+          "title": "Where growth came from",
+          "columns": [
+            { "heading": "New customers", "text": "Enterprise deals closed faster after the pricing change." },
+            { "heading": "Expansion", "text": "Existing accounts added seats across three regions." }
+          ]
+        },
+        {
+          "layout": "statement",
+          "title": "Retention is now our strongest growth lever."
+        },
+        {
+          "layout": "closing",
+          "title": "Questions and discussion"
+        }
+      ]
+    },
+    {
+      "type": "report",
+      "title": "Briefing document",
+      "sections": [
+        {
+          "heading": "Executive summary",
+          "body": "Revenue reached **$4.2M**, up 18% on the prior quarter.\n\nChurn fell to 2.1% after the onboarding changes."
+        },
+        {
+          "heading": "Recommendations",
+          "body": "- Expand the enterprise tier\n- Keep support costs flat\n\n1. Confirm the Q4 hiring plan\n2. Review pricing in November"
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "title": "Q3 check-in",
+      "questions": [
+        {
+          "question": "What was monthly churn at the end of Q3?",
+          "options": ["3.4%", "2.1%", "5.0%"],
+          "answer": 1,
+          "explanation": "Churn fell from 3.4% to 2.1% during the quarter.",
+          "hint": "It improved during the quarter.",
+          "rationales": [
+            "This was churn before the onboarding changes.",
+            "Churn fell to 2.1% by September.",
+            "Churn never reached 5% this year."
+          ]
+        }
+      ]
+    }
+  ]
+}

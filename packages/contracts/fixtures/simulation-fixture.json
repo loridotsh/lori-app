@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "title": "See how speed changes distance",
+  "summary": "Speed is distance divided by time. At 20 m/s, five seconds of travel covers 100 metres. Adjust the speed, then press Play to explore.",
+  "blocks": [{
+    "type": "simulation", "title": "Constant speed on a straight road",
+    "inputs": [{ "id": "speed", "label": "Speed", "min": 0, "max": 40, "step": 1, "value": 20, "unit": "m/s" }],
+    "timeline": { "id": "time", "label": "Elapsed time", "min": 0, "max": 15, "step": 0.1, "value": 0, "rate": 1, "unit": "s" },
+    "outputs": [
+      { "label": "Distance travelled", "expression": "speed * time", "unit": "m", "precision": 1 },
+      { "label": "Speed in km/h", "expression": "speed * 3.6", "unit": "km/h", "precision": 1 }
+    ],
+    "view": { "type": "track", "label": "Distance from start", "min": 0, "max": 600, "unit": "m", "items": [{ "label": "Traveller", "expression": "speed * time" }] },
+    "note": "The same selected constant speed applies to the whole elapsed time. Changing speed compares a new constant-speed scenario. Playback advances one second per real second."
+  }]
+}

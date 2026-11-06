@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "title": "From research to understanding",
+  "summary": "Explore the research workflow and practice the core concepts. Example material for product verification.",
+  "sources": [
+    {
+      "label": "Research brief",
+      "reference": "research.md · revision 3 · sections 1–2"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "diagram",
+      "title": "A grounded research workflow",
+      "direction": "right",
+      "nodes": [
+        {
+          "id": "sources",
+          "label": "Read sources",
+          "detail": "Inspect the selected source material."
+        },
+        {
+          "id": "synthesis",
+          "label": "Find connections",
+          "detail": "Separate evidence from inference."
+        },
+        {
+          "id": "review",
+          "label": "Review findings",
+          "detail": "Check the conclusions against sources."
+        },
+        {
+          "id": "publish",
+          "label": "Share the result",
+          "detail": "Keep source references alongside the output."
+        }
+      ],
+      "edges": [
+        {
+          "from": "sources",
+          "to": "synthesis"
+        },
+        {
+          "from": "synthesis",
+          "to": "review"
+        },
+        {
+          "from": "review",
+          "to": "publish",
+          "label": "Ready"
+        },
+        {
+          "from": "review",
+          "to": "synthesis",
+          "label": "Refine"
+        }
+      ]
+    },
+    {
+      "type": "mindmap",
+      "title": "What makes research useful?",
+      "nodes": [
+        {
+          "id": "research",
+          "label": "Useful research",
+          "detail": "Evidence, synthesis, and clear communication."
+        },
+        {
+          "id": "evidence",
+          "parentId": "research",
+          "label": "Evidence"
+        },
+        {
+          "id": "sources",
+          "parentId": "evidence",
+          "label": "Read original sources",
+          "detail": "Keep exact versions and page references."
+        },
+        {
+          "id": "synthesis",
+          "parentId": "research",
+          "label": "Synthesis",
+          "detail": "Explain how the evidence relates to the question."
+        },
+        {
+          "id": "communication",
+          "parentId": "research",
+          "label": "Communication"
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "A research sprint",
+      "items": [
+        {
+          "label": "Day 1",
+          "title": "Gather evidence",
+          "text": "Define the question and read the primary sources."
+        },
+        {
+          "label": "Day 2",
+          "title": "Build understanding",
+          "text": "Map the relationships and test assumptions."
+        },
+        {
+          "label": "Day 3",
+          "title": "Review and share",
+          "text": "Verify conclusions and share an accessible summary."
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "title": "Check your understanding",
+      "questions": [
+        {
+          "question": "What should support a research conclusion?",
+          "options": [
+            "An original source",
+            "An untested assumption",
+            "A confident tone"
+          ],
+          "answer": 0,
+          "explanation": "Original sources let readers check the evidence behind a conclusion."
+        },
+        {
+          "question": "When should you revise a conclusion?",
+          "options": [
+            "Never",
+            "When new evidence changes it"
+          ],
+          "answer": 1,
+          "explanation": "A conclusion should follow the available evidence."
+        }
+      ]
+    },
+    {
+      "type": "flashcards",
+      "title": "Research essentials",
+      "cards": [
+        {
+          "front": "What is a primary source?",
+          "back": "Original material that directly supports a claim."
+        },
+        {
+          "front": "What is an assumption?",
+          "back": "A premise taken as true that should be stated and checked."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1018 @@
+[
+  {
+    "name": "unknown artifact version",
+    "path": [
+      "version"
+    ],
+    "value": 2
+  },
+  {
+    "name": "unknown artifact block",
+    "path": [
+      "blocks",
+      0,
+      "type"
+    ],
+    "value": "html"
+  },
+  {
+    "name": "extra node action",
+    "path": [
+      "blocks",
+      0,
+      "nodes",
+      0,
+      "onClick"
+    ],
+    "value": "delete()"
+  },
+  {
+    "name": "unknown graph direction",
+    "path": [
+      "blocks",
+      0,
+      "direction"
+    ],
+    "value": "left"
+  },
+  {
+    "name": "diagram duplicate ID",
+    "path": [
+      "blocks",
+      0,
+      "nodes",
+      1,
+      "id"
+    ],
+    "value": "sources"
+  },
+  {
+    "name": "invalid node ID",
+    "path": [
+      "blocks",
+      0,
+      "nodes",
+      0,
+      "id"
+    ],
+    "value": "1root"
+  },
+  {
+    "name": "unsafe node ID",
+    "path": [
+      "blocks",
+      0,
+      "nodes",
+      0,
+      "id"
+    ],
+    "value": "root#target"
+  },
+  {
+    "name": "dangling diagram edge",
+    "path": [
+      "blocks",
+      0,
+      "edges",
+      0,
+      "to"
+    ],
+    "value": "missing"
+  },
+  {
+    "name": "diagram self edge",
+    "path": [
+      "blocks",
+      0,
+      "edges",
+      0,
+      "to"
+    ],
+    "value": "sources"
+  },
+  {
+    "name": "repeated diagram edge",
+    "path": [
+      "blocks",
+      0,
+      "edges",
+      1
+    ],
+    "value": {
+      "from": "sources",
+      "to": "synthesis"
+    }
+  },
+  {
+    "name": "blank diagram label",
+    "path": [
+      "blocks",
+      0,
+      "nodes",
+      0,
+      "label"
+    ],
+    "value": " \n "
+  },
+  {
+    "name": "blank diagram detail",
+    "path": [
+      "blocks",
+      0,
+      "nodes",
+      0,
+      "detail"
+    ],
+    "value": " "
+  },
+  {
+    "name": "too many diagram nodes",
+    "path": [
+      "blocks",
+      0,
+      "nodes"
+    ],
+    "value": [
+      {
+        "id": "n0",
+        "label": "0"
+      },
+      {
+        "id": "n1",
+        "label": "1"
+      },
+      {
+        "id": "n2",
+        "label": "2"
+      },
+      {
+        "id": "n3",
+        "label": "3"
+      },
+      {
+        "id": "n4",
+        "label": "4"
+      },
+      {
+        "id": "n5",
+        "label": "5"
+      },
+      {
+        "id": "n6",
+        "label": "6"
+      },
+      {
+        "id": "n7",
+        "label": "7"
+      },
+      {
+        "id": "n8",
+        "label": "8"
+      },
+      {
+        "id": "n9",
+        "label": "9"
+      },
+      {
+        "id": "n10",
+        "label": "10"
+      },
+      {
+        "id": "n11",
+        "label": "11"
+      },
+      {
+        "id": "n12",
+        "label": "12"
+      },
+      {
+        "id": "n13",
+        "label": "13"
+      },
+      {
+        "id": "n14",
+        "label": "14"
+      },
+      {
+        "id": "n15",
+        "label": "15"
+      },
+      {
+        "id": "n16",
+        "label": "16"
+      },
+      {
+        "id": "n17",
+        "label": "17"
+      },
+      {
+        "id": "n18",
+        "label": "18"
+      },
+      {
+        "id": "n19",
+        "label": "19"
+      },
+      {
+        "id": "n20",
+        "label": "20"
+      }
+    ]
+  },
+  {
+    "name": "too many diagram edges",
+    "path": [
+      "blocks",
+      0,
+      "edges"
+    ],
+    "value": [
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      },
+      {
+        "from": "sources",
+        "to": "synthesis"
+      }
+    ]
+  },
+  {
+    "name": "mindmap multiple roots",
+    "path": [
+      "blocks",
+      1,
+      "nodes",
+      1
+    ],
+    "value": {
+      "id": "evidence",
+      "label": "Evidence"
+    }
+  },
+  {
+    "name": "mindmap missing root",
+    "path": [
+      "blocks",
+      1,
+      "nodes",
+      0,
+      "parentId"
+    ],
+    "value": "evidence"
+  },
+  {
+    "name": "mindmap dangling parent",
+    "path": [
+      "blocks",
+      1,
+      "nodes",
+      1,
+      "parentId"
+    ],
+    "value": "missing"
+  },
+  {
+    "name": "mindmap self parent",
+    "path": [
+      "blocks",
+      1,
+      "nodes",
+      1,
+      "parentId"
+    ],
+    "value": "evidence"
+  },
+  {
+    "name": "mindmap disconnected cycle",
+    "path": [
+      "blocks",
+      1,
+      "nodes",
+      1,
+      "parentId"
+    ],
+    "value": "sources"
+  },
+  {
+    "name": "mindmap duplicate ID",
+    "path": [
+      "blocks",
+      1,
+      "nodes",
+      1,
+      "id"
+    ],
+    "value": "research"
+  },
+  {
+    "name": "too many mindmap nodes",
+    "path": [
+      "blocks",
+      1,
+      "nodes"
+    ],
+    "value": [
+      {
+        "id": "n0",
+        "label": "0"
+      },
+      {
+        "id": "n1",
+        "label": "1"
+      },
+      {
+        "id": "n2",
+        "label": "2"
+      },
+      {
+        "id": "n3",
+        "label": "3"
+      },
+      {
+        "id": "n4",
+        "label": "4"
+      },
+      {
+        "id": "n5",
+        "label": "5"
+      },
+      {
+        "id": "n6",
+        "label": "6"
+      },
+      {
+        "id": "n7",
+        "label": "7"
+      },
+      {
+        "id": "n8",
+        "label": "8"
+      },
+      {
+        "id": "n9",
+        "label": "9"
+      },
+      {
+        "id": "n10",
+        "label": "10"
+      },
+      {
+        "id": "n11",
+        "label": "11"
+      },
+      {
+        "id": "n12",
+        "label": "12"
+      },
+      {
+        "id": "n13",
+        "label": "13"
+      },
+      {
+        "id": "n14",
+        "label": "14"
+      },
+      {
+        "id": "n15",
+        "label": "15"
+      },
+      {
+        "id": "n16",
+        "label": "16"
+      },
+      {
+        "id": "n17",
+        "label": "17"
+      },
+      {
+        "id": "n18",
+        "label": "18"
+      },
+      {
+        "id": "n19",
+        "label": "19"
+      },
+      {
+        "id": "n20",
+        "label": "20"
+      },
+      {
+        "id": "n21",
+        "label": "21"
+      },
+      {
+        "id": "n22",
+        "label": "22"
+      },
+      {
+        "id": "n23",
+        "label": "23"
+      },
+      {
+        "id": "n24",
+        "label": "24"
+      },
+      {
+        "id": "n25",
+        "label": "25"
+      },
+      {
+        "id": "n26",
+        "label": "26"
+      },
+      {
+        "id": "n27",
+        "label": "27"
+      },
+      {
+        "id": "n28",
+        "label": "28"
+      },
+      {
+        "id": "n29",
+        "label": "29"
+      },
+      {
+        "id": "n30",
+        "label": "30"
+      },
+      {
+        "id": "n31",
+        "label": "31"
+      },
+      {
+        "id": "n32",
+        "label": "32"
+      }
+    ]
+  },
+  {
+    "name": "blank timeline item",
+    "path": [
+      "blocks",
+      2,
+      "items",
+      0,
+      "text"
+    ],
+    "value": " "
+  },
+  {
+    "name": "timeline unknown status",
+    "path": [
+      "blocks",
+      2,
+      "items",
+      0,
+      "status"
+    ],
+    "value": "complete"
+  },
+  {
+    "name": "too many events",
+    "path": [
+      "blocks",
+      2,
+      "items"
+    ],
+    "value": [
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      },
+      {
+        "label": "A",
+        "title": "B",
+        "text": "C"
+      }
+    ]
+  },
+  {
+    "name": "quiz missing explanation",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "explanation"
+    ],
+    "value": ""
+  },
+  {
+    "name": "quiz empty option",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "options",
+      0
+    ],
+    "value": " "
+  },
+  {
+    "name": "quiz repeated options",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "options"
+    ],
+    "value": [
+      "a",
+      " a "
+    ]
+  },
+  {
+    "name": "quiz answer out of bounds",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "answer"
+    ],
+    "value": 3
+  },
+  {
+    "name": "quiz negative answer",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "answer"
+    ],
+    "value": -1
+  },
+  {
+    "name": "quiz fractional answer",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "answer"
+    ],
+    "value": 0.5
+  },
+  {
+    "name": "quiz too few options",
+    "path": [
+      "blocks",
+      3,
+      "questions",
+      0,
+      "options"
+    ],
+    "value": [
+      "one"
+    ]
+  },
+  {
+    "name": "flashcard blank answer",
+    "path": [
+      "blocks",
+      4,
+      "cards",
+      0,
+      "back"
+    ],
+    "value": " "
+  },
+  {
+    "name": "too many cards",
+    "path": [
+      "blocks",
+      4,
+      "cards"
+    ],
+    "value": [
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      },
+      {
+        "front": "A",
+        "back": "B"
+      }
+    ]
+  },
+  {
+    "name": "source unknown action",
+    "path": [
+      "sources",
+      0,
+      "url"
+    ],
+    "value": "javascript:alert(1)"
+  },
+  {
+    "name": "blank source reference",
+    "path": [
+      "sources",
+      0,
+      "reference"
+    ],
+    "value": "\t"
+  },
+  {
+    "name": "too many sources",
+    "path": [
+      "sources"
+    ],
+    "value": [
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      },
+      {
+        "label": "A",
+        "reference": "B"
+      }
+    ]
+  },
+  {
+    "name": "oversized source reference",
+    "path": [
+      "sources",
+      0,
+      "reference"
+    ],
+    "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "source is not an object",
+    "path": [
+      "sources",
+      0
+    ],
+    "value": "https://example.com"
+  }
+]

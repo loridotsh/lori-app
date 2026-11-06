@@ -1,0 +1,16 @@
+[
+  { "name": "duplicate timeline input", "path": ["blocks", 0, "timeline", "id"], "value": "speed" },
+  { "name": "zero playback rate", "path": ["blocks", 0, "timeline", "rate"], "value": 0 },
+  { "name": "unbounded playback rate", "path": ["blocks", 0, "timeline", "rate"], "value": 1001 },
+  { "name": "unbounded timeline", "path": ["blocks", 0, "timeline", "max"], "value": 3601 },
+  { "name": "inverted track axis", "path": ["blocks", 0, "view", "min"], "value": 600 },
+  { "name": "unknown scene", "path": ["blocks", 0, "view", "type"], "value": "html" },
+  { "name": "undefined coordinate variable", "path": ["blocks", 0, "view", "items", 0, "expression"], "value": "distance * time" },
+  { "name": "undefined start coordinate", "path": ["blocks", 0, "view", "items", 0, "expression"], "value": "1 / time" },
+  { "name": "undefined final coordinate", "path": ["blocks", 0, "view", "items", 0, "expression"], "value": "1 / (15-time)" },
+  { "name": "undefined final output", "path": ["blocks", 0, "outputs", 0, "expression"], "value": "1 / (15-time)" },
+  { "name": "hidden native action", "path": ["blocks", 0, "onPlay"], "value": "invoke('run_command')" },
+  { "name": "autoplay injection", "path": ["blocks", 0, "autoplay"], "value": true },
+  { "name": "whitespace control label", "path": ["blocks", 0, "timeline", "label"], "value": " " },
+  { "name": "empty scene label", "path": ["blocks", 0, "view", "items", 0, "label"], "value": " " }
+]
