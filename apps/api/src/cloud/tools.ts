@@ -157,7 +157,8 @@ const Schemas: Record<string, z.ZodType> = {
     .strict(),
   run_command: z
     .object({
-      command: z.string().min(1).max(20000),
+      // The sandbox passes this as one argument, and Linux caps that at 128 KiB.
+      command: z.string().min(1).refine((value) => Buffer.byteLength(value) <= 100000, "Keep a command under 100,000 bytes. For a larger build, split it across files with write_file and run them."),
       cwd: z.string().max(240).optional(),
       inputPaths: z.array(Path).max(100).default([]),
       timeoutSeconds: z.number().int().min(1).max(600).default(120),

@@ -11,7 +11,7 @@ Use for PPTX creation and revision. When the member wants a deck to view or pres
 
 ## How to work
 1. Decide the audience, the decision or message, and the length (a typical update is 6 to 10 slides). Draft the story as a list of slide headlines that read as a summary on their own.
-2. Build the whole deck with the `lori_design` kit in **one** `run_command` (`from lori_design.pptx_kit import Deck`). It gives 16:9 slides with real title placeholders, native editable charts and tables, speaker notes, slide numbers, and text that is measured to fit.
+2. Build the whole deck with the `lori_design` kit in **one** `run_command` (`from lori_design.pptx_kit import Deck`). It gives 16:9 slides with real title placeholders, native editable charts and tables, speaker notes, slide numbers, and text that is measured to fit. A command holds up to 100,000 bytes. For a very long deck, put each section's slides in its own Python file with `write_file`, then run one command that imports them all.
 3. Read `deck.warnings` after building: any text that cannot fit is reported there. Fix the content (shorter headline, fewer points, split the slide); do not shrink text below the kit's limits.
 4. After the member applies the file: `validate_document`, then `render_document` (up to 6 slides per call) and look at every slide. Fix and rebuild until clean.
 5. Reply with the story in one or two sentences, the slide count, assumptions and caveats.
