@@ -1,0 +1,54 @@
+{
+  "name": "lori-enterprise",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "postcss": "8.5.24",
+    "sharp": "0.35.5"
+  },
+  "overrides": {
+    "postcss": "$postcss",
+    "sharp": "$sharp"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "0.28.1",
+    "@next/swc-darwin-arm64": "16.4.3",
+    "@next/swc-darwin-x64": "16.4.3",
+    "@next/swc-linux-arm64-gnu": "16.4.3",
+    "@next/swc-linux-arm64-musl": "16.4.3",
+    "@next/swc-linux-x64-gnu": "16.4.3",
+    "@next/swc-linux-x64-musl": "16.4.3",
+    "@next/swc-win32-arm64-msvc": "16.4.3",
+    "@next/swc-win32-x64-msvc": "16.4.3",
+    "@rollup/rollup-linux-x64-gnu": "4.62.3"
+  },
+  "scripts": {
+    "build": "npm run build:contracts && npm run build:api && npm run build:web",
+    "build:contracts": "npm run build -w @lori-enterprise/contracts",
+    "build:api": "npm run build -w @lori-enterprise/api",
+    "build:web": "npm run build -w @lori-enterprise/web",
+    "dev": "npm run build:contracts && node scripts/dev-postgres.mjs prepare && concurrently -n api,web -c blue,magenta \"npm run dev -w @lori-enterprise/api\" \"npm run dev -w @lori-enterprise/web\"",
+    "dev:cloud": "node scripts/dev-cloud.mjs",
+    "demo": "node scripts/demo.mjs",
+    "dev:cloud:build-worker": "docker build --target production -f apps/worker/Dockerfile -t lori-enterprise-work-worker:local .",
+    "dev:db:prepare": "node scripts/dev-postgres.mjs prepare",
+    "dev:db:start": "node scripts/dev-postgres.mjs start",
+    "dev:db:stop": "node scripts/dev-postgres.mjs stop",
+    "lint": "eslint .",
+    "test": "npm run build:contracts && node --test scripts/dev-cloud.test.mjs scripts/demo.test.mjs && npm run test -w @lori-enterprise/api && npm run test -w @lori-enterprise/web",
+    "typecheck": "npm run typecheck -w @lori-enterprise/contracts && npm run typecheck -w @lori-enterprise/api && npm run typecheck -w @lori-enterprise/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "eslint": "^10.8.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

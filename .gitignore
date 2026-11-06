@@ -1,0 +1,24 @@
+# Repository-local editor and OS files
+.commandcode/
+.vscode/
+.idea
+.DS_Store
+
+# Application artifacts and secrets
+.env
+.env.*
+!.env.example
+.local/
+.next/
+coverage/
+dist/
+node_modules/
+*.tsbuildinfo
+apps/worker/target/
+apps/api/semantic/model/
+apps/worker/native/__pycache__/
+
+# Private UI captures and generated Python bytecode
+.impeccable/review/
+__pycache__/
+*.py[cod]

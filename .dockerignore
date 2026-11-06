@@ -1,0 +1,14 @@
+.env
+.git
+.next
+**/.next
+**/coverage
+**/dist
+**/node_modules
+node_modules
+npm-debug.log
+**/target
+**/__pycache__
+.local
+
+.impeccable/review
