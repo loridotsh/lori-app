@@ -10,6 +10,8 @@ import type { CalculatorBlock, ChartBlock } from "@lori-enterprise/contracts";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 const visual = parseVisual(fixture)!;
+/** Numbers follow the viewer's locale, so 160,000 reads 1,60,000 in India. */
+const localNumber = (value: number) => new Intl.NumberFormat().format(value);
 function activity(overrides: Partial<ToolActivity> = {}): ToolActivity {
   const result = overrides.output as { visual?: unknown } | undefined;
   return { id: "visual", runId: "run", roundId: "round", callId: "call", actionHash: "hash", name: "present_visual", status: "completed", textOffset: 0,
@@ -32,12 +34,12 @@ describe("Work inline visuals", () => {
   it("updates calculator outputs immediately and preserves inputs across subsequent message revisions", () => {
     const { rerender } = render(<VisualActivity item={activity()} />);
     const output = () => screen.getByLabelText("Monthly revenue");
-    expect(output().textContent).toContain("96,000");
+    expect(output().textContent).toContain(localNumber(96_000));
     fireEvent.change(screen.getByRole("slider", { name: "Adjust Customers" }), { target: { value: "200" } });
-    expect(output().textContent).toContain("160,000");
+    expect(output().textContent).toContain(localNumber(160_000));
     rerender(<VisualActivity item={activity({ output: structuredClone({ visual: fixture }) })} />);
     expect((screen.getByRole("spinbutton", { name: "Customers" }) as HTMLInputElement).value).toBe("200");
-    expect(output().textContent).toContain("160,000");
+    expect(output().textContent).toContain(localNumber(160_000));
     fireEvent.change(screen.getByRole("spinbutton", { name: "Customers" }), { target: { value: "" } });
     expect(output().textContent).toBe("Check inputs");
     expect(screen.getByRole("spinbutton", { name: "Customers" }).getAttribute("aria-invalid")).toBe("true");
@@ -60,7 +62,7 @@ describe("Work inline visuals", () => {
     rerender(<VisualActivity item={activity({ output: { visual: { ...visual, blocks: [block] } } })} />);
     expect(screen.getByLabelText("Monthly revenue").textContent).toBe("96,000");
     fireEvent.change(screen.getByRole("spinbutton", { name: "Customers" }), { target: { value: "250" } });
-    expect(screen.getByLabelText("Monthly revenue").textContent).toBe("200,000");
+    expect(screen.getByLabelText("Monthly revenue").textContent).toBe(localNumber(200_000));
   });
   it("shows every step at once as an ordered, labelled sequence", () => {
     render(<VisualActivity item={activity()} />);
