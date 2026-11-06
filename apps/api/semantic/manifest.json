@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "multilingual-e5-small-q8-761b726",
+  "model": "intfloat/multilingual-e5-small",
+  "license": "MIT",
+  "source": "https://huggingface.co/Xenova/multilingual-e5-small/resolve/761b726dd34fb83930e26aab4e9ac3899aa1fa78/",
+  "files": {
+    "onnx/model_quantized.onnx": {
+      "sha256": "f80102d3f2a1229f387d3c81909990d8945513e347b0eab049f7de3c6f98c193",
+      "size": 118308185
+    },
+    "tokenizer.json": {
+      "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39",
+      "size": 17082730
+    },
+    "tokenizer_config.json": {
+      "sha256": "a1d6bc8734a6f635dc158508bef000f8e2e5a759c7d92f984b2c86e5ff53425b",
+      "size": 443
+    }
+  },
+  "dimensions": 384,
+  "maxTokens": 512,
+  "queryPrefix": "query: ",
+  "passagePrefix": "passage: ",
+  "pooling": "mean over attention mask, L2 normalized",
+  "chunkTokens": 384,
+  "overlapTokens": 48,
+  "candidates": 50,
+  "rrfK": 60,
+  "gate": {
+    "minMarginOverAnchorMean": 0.085,
+    "anchors": [
+      "The meeting notes were shared with the team.",
+      "Please review the attached document.",
+      "The weather is pleasant today.",
+      "We discussed several topics during the call.",
+      "This is a general note about everyday tasks.",
+      "The report contains a summary of recent work.",
+      "मैंने आज कुछ काम पूरा किया।",
+      "Kal sab log office aayenge.",
+      "The function returns a value after processing input.",
+      "A list of items was updated yesterday.",
+      "Thanks for the help earlier.",
+      "The project has a few open questions.",
+      "I will follow up next week.",
+      "Some files were moved to a new folder.",
+      "The price may change in the future.",
+      "She said the plan looks fine."
+    ]
+  }
+}

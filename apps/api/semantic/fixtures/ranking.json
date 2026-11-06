@@ -1,0 +1,11 @@
+{
+  "rrfK": 60,
+  "order": "fused score descending, then best rank ascending, then id ascending",
+  "cases": [
+    { "lexical": ["a", "b", "c"], "semantic": [], "expected": ["a", "b", "c"] },
+    { "lexical": ["a", "b"], "semantic": ["b", "c"], "expected": ["b", "a", "c"] },
+    { "lexical": [], "semantic": ["x", "y"], "expected": ["x", "y"] },
+    { "lexical": ["a", "b"], "semantic": ["b", "a"], "expected": ["a", "b"] },
+    { "lexical": ["a", "b", "c", "d"], "semantic": ["d", "e"], "expected": ["d", "a", "b", "e", "c"] }
+  ]
+}
