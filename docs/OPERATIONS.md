@@ -84,8 +84,9 @@ docker compose -f oci://ghcr.io/loridotsh/lori-enterprise-stack:v0.2.0 --profile
 ```
 
 Open `/setup`, paste the token, and create the first administrator. Portainer and
-offline bundles are documented in [deploy/OPERATOR.md](../deploy/OPERATOR.md). Release
-artifacts: [GitHub Releases](https://github.com/loridotsh/lori-enterprise/releases).
+offline bundles are documented in [deploy/OPERATOR.md](../deploy/OPERATOR.md).
+Prebuilt packages are shared with customers privately. Everyone else can build
+from source as described below.
 
 ## Quick start (Docker, from source)
 
@@ -247,7 +248,7 @@ GitHub Actions workflows. Integration tests honor `LORI_TEAM_INTEGRATION_TEST` a
 
 - [Lori product guide: application and Enterprise functionality](handbook/README.md)
 - [Cloud Work generative responses](WORK_CLOUD_GEN_UI.md)
-- [Enterprise and Lori review, 2026-10-14](WORK_CLOUD_REVIEW_2026_10_14.md)
+- [Image and video generation](WORK_MEDIA.md)
 
 | Document | Purpose |
 | --- | --- |

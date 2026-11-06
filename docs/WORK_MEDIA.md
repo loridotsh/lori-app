@@ -26,9 +26,14 @@ and 0G's default resolution and aspect ratio.
 | Limit | Value |
 | --- | --- |
 | One image request | 5 minutes |
-| One video | 13 minutes, inside the worker's 15-minute run budget |
+| One video | 30 minutes, inside the worker's 60-minute run budget |
 | One generated file | 256 MiB |
 | Generated files in one conversation | 2 GiB |
+
+Room is checked before generating, so a full conversation is never charged for a
+file it cannot keep. Generated files do not count against the 100 MiB allowance
+for uploads and tool output. Players read a file in 4 MiB ranges, so seeking does
+not load a whole clip.
 
 A run cancelled before a clip finishes leaves the job at 0G, which charges for a
 video once it is polled or downloaded after completion.

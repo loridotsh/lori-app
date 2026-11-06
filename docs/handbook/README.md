@@ -13,7 +13,7 @@ Understand what Lori does, why each feature exists, who it helps, and how to use
 
 Each feature has a plain description and a **Why use it** explanation. Features are grouped by the job a person is doing. Short examples show how the features work together. Availability and source references are kept at the end of each guide.
 
-For installation, development commands, and code structure, use the existing [Lori README][desktop-readme] and [Enterprise README][enterprise-readme].
+For installation, development commands, and code structure, use the [project README][enterprise-readme].
 
 ## Documentation approach
 
@@ -21,7 +21,6 @@ These guides were rebuilt from the current interface composition, settings, tool
 
 The writing approach follows [Google's audience guidance][audience]: explain the knowledge a new reader needs and define unfamiliar terms. It uses [Diataxis explanation guidance][explanation] to connect what a feature does with why it exists, and [Microsoft's instruction guidance][instructions] for short, located user workflows. Developer setup stays in repository documentation so a product reader can follow the guide without learning the implementation first.
 
-[desktop-readme]: https://github.com/loridotsh/lori/blob/f1f24c868ecd63b56eb3b31463d3769f09489512/README.md
 [enterprise-readme]: ../../README.md
 [audience]: https://developers.google.com/tech-writing/one/audience
 [explanation]: https://diataxis.fr/explanation/

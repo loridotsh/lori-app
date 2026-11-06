@@ -15,17 +15,13 @@ at **http://localhost**.
 
 ## Before you start: get access to the package
 
-As checked on 2026-10-22, the latest published build is
-[v0.1.2](https://github.com/loridotsh/lori-enterprise/releases/tag/v0.1.2).
-The release download and container images currently require an authorized
-GitHub account. Ask the Lori administrator to grant access before installing.
-A release page returning 404 or an image pull returning 401/403 can mean access
-is missing.
+Prebuilt packages are shared with customers privately, so this guide needs the
+release link and registry access from your Lori contact. An image pull returning
+401/403 can mean access is missing. To try Lori without a package, build it from
+source as the [README](../README.md#run-it) describes.
 
-This build includes the Enterprise control plane, API and dashboard. It does
-**not include the current Cloud Work worker**. Installing the latest source is
-a maintainer workflow; customers need a new, matched API/web/worker release to
-install those Work features through the same prebuilt-package process.
+Prebuilt packages can lag the source, so check with your contact which Work
+features yours includes.
 
 Have your company name, administrator name and email, and a password of 12–128
 characters ready.
@@ -55,7 +51,7 @@ wait for the engine. Docker Desktop includes Docker Compose.
 ## 2. Download the Enterprise installation package
 
 1. Sign in to GitHub with the account granted access by your administrator.
-2. Open the [Lori Enterprise v0.1.2 release](https://github.com/loridotsh/lori-enterprise/releases/tag/v0.1.2).
+2. Open the release link your Lori contact gave you.
 3. Under **Assets**, download **`lori-enterprise-docker.tar.gz`** to Downloads.
    Choose that file, rather than GitHub's automatic source-code archives.
 
@@ -211,7 +207,7 @@ email. Future visits use **http://localhost/sign-in**.
 - Open **People → Invite member** to create an invitation link. Share it with
   the intended member; invitation emails are not sent automatically.
 - To connect a desktop, first obtain and install your company's approved
-  [Lori Desktop build](https://github.com/loridotsh/lori/releases), open it, then
+  Lori Desktop build, open it, then
   use **Connect Lori desktop** on the Enterprise welcome page and complete
   browser approval. The Enterprise Docker package installs the server; the
   desktop application is installed separately.

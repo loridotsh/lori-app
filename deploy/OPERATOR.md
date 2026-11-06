@@ -86,7 +86,7 @@ limits; its `compose.yaml` retains those environment-variable overrides.
 
 ## Method 2 — Portainer / Docker Desktop (GUI)
 
-1. Download **`lori-enterprise-docker.tar.gz`** from the [GitHub Release](https://github.com/loridotsh/lori-enterprise/releases) for your version.
+1. Download **`lori-enterprise-docker.tar.gz`** from the release link your Lori contact gave you.
 2. Unzip on the server (e.g. `/opt/lori-enterprise`).
 3. Copy the archive's `env.example` to `.env` and set `LORI_ADDRESS`.
 4. In **Portainer**: *Stacks* → *Add stack* → paste or upload `compose.yaml`, add override `compose.images.yaml`, set env vars from `.env`.

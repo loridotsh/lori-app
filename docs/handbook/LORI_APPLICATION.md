@@ -410,17 +410,3 @@ When enabled for your company and granted to you, Cloud Work includes shared pro
 ## 12. Availability and source notes
 
 This guide describes the current implementation reviewed on **22 October 2026**. Installed-build features, agent capabilities, connected services, document runtime support, and company permissions determine what an individual user sees. Enterprise Projects require company enablement. User-visible previews do not imply full editing support for every file format.
-
-Source areas checked: [application shell and Code interface][code], [agent conversation controls][agent-ui], [Chat interface][chat], [extensions and skills][extensions], [providers][providers], [automations][automations], [settings][settings], [Work interface][work], [native Work tools][tools], and [Work artifact behavior][artifacts]. Developer setup remains in the [desktop repository README][developer-readme].
-
-[code]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/components
-[agent-ui]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/components/agent-ui
-[chat]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/chat
-[extensions]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/components/marketplace
-[providers]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/components/providers
-[automations]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/components/automations
-[settings]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/components/settings
-[work]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src/work
-[tools]: https://github.com/loridotsh/lori/tree/f1f24c868ecd63b56eb3b31463d3769f09489512/src-tauri/src/work/tools
-[artifacts]: https://github.com/loridotsh/lori/blob/f1f24c868ecd63b56eb3b31463d3769f09489512/docs/WORK_ARTIFACTS.md
-[developer-readme]: https://github.com/loridotsh/lori/blob/f1f24c868ecd63b56eb3b31463d3769f09489512/README.md

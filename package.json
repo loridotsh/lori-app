@@ -1,6 +1,13 @@
 {
   "name": "lori-enterprise",
   "version": "0.1.2",
+  "description": "A private AI workspace for people and teams: sandboxed agents, finished documents, and your own models on your own server.",
+  "homepage": "https://lori.sh",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loridotsh/lori-app.git"
+  },
+  "license": "MIT",
   "private": true,
   "type": "module",
   "workspaces": [

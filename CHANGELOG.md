@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Lori Enterprise are documented in this file.
+All notable changes to Lori are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -15,10 +15,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Sandbox writes** — the model is told that only the working directory and `$TMPDIR` are writable, and a command that hits a read-only path now gets a precise way to recover.
+- **Tool call IDs** — IDs a gateway repeats in the stream are no longer doubled, and any ID over 64 characters is shortened on the wire. Long GPT 6.1 runs failed with `string_above_max_length` because of this.
+- **Text-only models** — page images are replaced with a note instead of failing the run with `model_not_capable`.
+- **Passing provider failures** — 408, 429 and 5xx responses are retried before any output reaches the member, and web research retries once.
+- **Retries** — a retry after a failed run can read the steps that already finished instead of repeating them.
+- **Failure messages** — a low provider balance has its own message, a refused request can be retried, and logs name the field a provider refused.
+- **Usage** — a later zero from a provider no longer erases a real token count.
+- **Skill references** — a shortened name such as `creation.md` now finds `references/creation.md`.
 
 ### Changed
 
-- **0G reply limits** — 0G models use their listed output limit instead of a shared 16,384-token cap, and a refused budget is retried once within the limit the provider names.
+- **0G reply limits** — 0G models use their listed output limit, up to the 32,768 tokens one stream can carry, and a refused budget is retried once within the limit the provider names. Reply budgets now shrink to fit the prompt rather than reserving room the prompt needs.
+- **Large tasks** — a run may work for 60 minutes, a reply is no longer cut after 10 minutes of streaming, keep-alives cover long thinking, and a command may be 100,000 bytes.
+- **File delivery** — files are served in 4 MiB ranges for seeking, reads have their own per-member allowance, and generated files have a separate 256 MiB per-file and 2 GiB per-conversation allowance.
 - **Inline generative responses** — validated metrics, charts, searchable/sortable tables, calculators, step explainers and paused simulations appear among response text and activity. Controls explore local data; approvals remain explicit. Readable fallbacks and stable response identity cover failures and streaming reconciliation.
 - **Long conversation history** — byte-bounded pages and a Load earlier messages control preserve complete replies, older conversation text, drafts and reading position. Desktop transport supports the bounded escaped-message envelope.
 
@@ -94,6 +103,3 @@ Operator-focused Docker distribution, clearer first-time setup, and release arti
 
 - **First-admin UX** — development and production setup flows surface token retrieval instructions in the dashboard.
 - **GHCR release notes** — release job attaches the Docker bundle using supported `gh release` syntax.
-
-[0.1.2]: https://github.com/loridotsh/lori-enterprise/releases/tag/v0.1.2
-[0.1.1]: https://github.com/loridotsh/lori-enterprise/releases/tag/v0.1.1

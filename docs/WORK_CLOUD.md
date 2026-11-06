@@ -294,12 +294,15 @@ are capped at 16,384 tokens, because direct providers count the requested budget
 against rate limits.
 
 0G is the exception, since it admits a request on a flat minimum. Its models use
-the limit 0G lists, up to half the context window. Models whose listing has no
-limit use a reviewed vendor figure, or otherwise an estimate of at most 16,384.
-If an upstream refuses the budget, the API retries once within the limit it
-named and remembers that limit. The worker's own check stays at 16,384 because
-the API replaces its budget on every provider request. A reply is still bounded
-by the 8 MiB stream limit and a run by the worker's 15-minute budget.
+the limit 0G lists, up to half the context window and at most 32,768 tokens, the
+most the 8 MiB stream limit reliably carries. Models whose listing has no limit
+use a reviewed vendor figure, or otherwise an estimate of at most 16,384. Prompt
+and reply share one window, so a request asks only for the reply room its prompt
+leaves. If an upstream refuses the budget, the API retries once within the limit
+it named and holds that limit for six hours. The worker's own check stays at
+16,384 because the API replaces its budget on every provider request. A run is
+bounded by the worker's 60-minute budget, which does not count time waiting for
+an approval.
 
 The history the
 planner may send is the context window minus the reply budget and a 10% safety
@@ -319,6 +322,19 @@ Provider quirks are handled in the API so members never see them:
   model is remembered for the life of the process so later turns skip the
   failed attempt. Cloud Work currently uses Chat Completions for every
   provider; reasoning with tools would need the Responses API.
+- Gateways can repeat a tool call's ID in a later chunk, so the API removes the
+  repeat before the worker joins the pieces. Any ID over 64 characters is sent as
+  a stable hash, because OpenAI refuses longer ones. Stored receipts keep the
+  original.
+- Text-only models refuse image input. Page images are replaced with a note when
+  the listing says so, or after one refusal, which is remembered for six hours on
+  that provider connection only.
+- 408, 429 and 5xx responses are retried twice before any byte reaches the
+  member. The ten-minute limit covers only the wait for response headers. Once a
+  reply is streaming, the API sends keep-alive comments during silence and gives
+  up after ten silent minutes.
+- A retry after a failed run is told which steps finished, so it can read their
+  saved results with `read_tool_output` instead of repeating the work.
 - Logs record only the provider's `code`, `type` and `param` identifiers for a
   refusal, never its message text.
 
