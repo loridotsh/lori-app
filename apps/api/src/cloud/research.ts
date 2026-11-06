@@ -1,8 +1,11 @@
 import { isIP } from "node:net";
+import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
 import { IdentityError } from "../auth/identity-service.js";
 import { publicAddress, redact } from "./extensions/security.js";
 import { McpSession, safeHttp, type Http, type Plugin } from "./extensions/transport.js";
+
+const RETRY_DELAY_MS = 1000;
 
 export const researchSchemas = {
   web_search: z.object({
@@ -66,6 +69,18 @@ export class CloudResearch {
       ...init,
       headers: { ...init.headers, ...(this.apiKey ? { "x-api-key": this.apiKey } : {}) },
     });
+    // One failed page or search should not cost the model a source, so a passing
+    // failure gets a second try. A reached quota will not recover in a second.
+    try {
+      return await this.call(fetch, args, http, signal);
+    } catch (error) {
+      if (signal.aborted || (error instanceof IdentityError && error.code === "cloud_research_rate_limited")) throw error;
+      await delay(RETRY_DELAY_MS, undefined, { signal });
+      return this.call(fetch, args, http, signal);
+    }
+  }
+
+  private async call(fetch: boolean, args: Record<string, unknown>, http: Http, signal: AbortSignal) {
     const session = new McpSession(provider, "", false, http,
       AbortSignal.any([signal, AbortSignal.timeout(45000)]));
     try {

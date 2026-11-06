@@ -57,6 +57,24 @@ describe("built-in public web research", () => {
         .rejects.toMatchObject({ code: "cloud_research_unavailable" });
     },
   );
+  it("recovers from one passing failure", async () => {
+    const good = fixture();
+    let attempts = 0;
+    const flaky: Http = async (plugin, url, init) => {
+      if (JSON.parse(init.body ?? "{}").method === "tools/call" && ++attempts === 1)
+        return { status: 503, headers: {}, body: "" };
+      return good.http(plugin, url, init);
+    };
+    const result = await new CloudResearch("", flaky).execute("web_search", { query: "news" }, new AbortController().signal);
+    expect(attempts).toBe(2);
+    expect(result).toMatchObject({ provider: "Exa" });
+  });
+  it("does not retry a reached quota", async () => {
+    const f = fixture({ content: [{ type: "text", text: "You've hit Exa's free MCP rate limit for today." }] });
+    await expect(new CloudResearch("", f.http).execute("web_search", { query: "news" }, new AbortController().signal))
+      .rejects.toMatchObject({ code: "cloud_research_rate_limited" });
+    expect(f.calls.filter((call) => call.body.method === "tools/call")).toHaveLength(1);
+  });
   it("does not send a cancelled request", async () => {
     const f = fixture();
     await expect(new CloudResearch("", f.http).execute("web_search", { query: "news" }, AbortSignal.abort())).rejects.toThrow();
