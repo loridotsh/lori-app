@@ -1,0 +1,49 @@
+{
+  "name": "call_plugin_tool",
+  "description": "Call a discovered Cloud plugin tool with the exact connection, schema hash and arguments from its complete input schema. Follow returned pagination for complete results. Changes follow the effective Work approval policy. Verify the intended result using returned IDs or a scoped read. An unknown write outcome may already have happened; never replay it automatically.",
+  "parameters": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "pluginId": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+      },
+      "connectionId": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+      },
+      "connectionRevision": {
+        "type": "integer",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      },
+      "schemaHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "arguments": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": true
+      }
+    },
+    "required": [
+      "pluginId",
+      "connectionId",
+      "connectionRevision",
+      "name",
+      "schemaHash",
+      "arguments"
+    ],
+    "additionalProperties": false
+  }
+}

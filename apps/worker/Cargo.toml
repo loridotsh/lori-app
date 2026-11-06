@@ -1,0 +1,23 @@
+[package]
+name = "lori-work-cloud-worker"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+lori-work-core = { path = "vendor/work-core" }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "sync", "time", "process", "io-util"] }
+uuid = { version = "1", features = ["v4"] }
+
+
+sha2 = "0.10"
+tempfile = "3"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
