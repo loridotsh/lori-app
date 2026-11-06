@@ -20,6 +20,8 @@ export interface WorkDiscoveredModel {
   unitPrice?: string;
   /** The clip length a video model defaults to; 0G requires one on every request. */
   videoSeconds?: number;
+  /** Set only by listings that declare it. False means a request with an image is refused. */
+  imageInput?: boolean;
 }
 /** The model's own default, then a length every current model accepts. */
 function zeroGVideoSeconds(entry: Record<string, unknown>): number {
@@ -76,6 +78,8 @@ export function modelMetadata(entry: Record<string, unknown>, providerId: string
     const unitPrice = zeroGUnitPrice(entry);
     if (unitPrice) model.unitPrice = unitPrice;
     if (model.category === "video") model.videoSeconds = zeroGVideoSeconds(entry);
+    const inputs = (entry.architecture as { input_modalities?: unknown } | undefined)?.input_modalities;
+    if (Array.isArray(inputs)) model.imageInput = inputs.includes("image");
   }
   if (limits.context) model.context_length = limits.context;
   if (limits.input) model.max_input_tokens = limits.input;
