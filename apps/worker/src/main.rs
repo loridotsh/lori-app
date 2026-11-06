@@ -78,7 +78,7 @@ struct Heartbeat {
 }
 
 /// How long a run may work, not counting time spent waiting for a member's approval.
-const GENERATION_BUDGET: Duration = Duration::from_secs(900);
+const GENERATION_BUDGET: Duration = Duration::from_secs(3600);
 // Bound scratch disk use too: staging many 64 MiB inputs before waiting for
 // the command slot would exhaust the worker's shared 256 MiB tmpfs.
 static EXECUTION_SLOT: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
