@@ -161,29 +161,36 @@ export function GeneratedMedia({
 }) {
   const name = file.path.split("/").at(-1)!;
   const action = "rounded-sm font-medium text-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring";
+  const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [file.sha256]);
   return (
-    <span className="block max-w-xl overflow-hidden rounded-xl border border-border bg-secondary/40">
-      {previewMode(file) === "video" ? (
+    <div className="max-w-xl overflow-hidden rounded-xl border border-border bg-secondary/40">
+      {broken ? (
+        <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+          This preview couldn&apos;t be shown. Open the file to try again.
+        </p>
+      ) : previewMode(file) === "video" ? (
         <video
           key={file.sha256}
           src={contentUrl(file.id)}
           controls
           playsInline
           preload="metadata"
+          onError={() => setBroken(true)}
           className="block max-h-[60dvh] w-full bg-black"
         />
       ) : (
         <button type="button" onClick={onOpen} aria-label={`Open ${name}`} className="block w-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {/* A private file behind the session cookie, so next/image has nothing to optimize. */}
-          <img src={contentUrl(file.id)} alt={name} loading="lazy" className="block max-h-[60dvh] w-full object-contain" />
+          <img src={contentUrl(file.id)} alt={name} loading="lazy" onError={() => setBroken(true)} className="block max-h-[60dvh] w-full object-contain" />
         </button>
       )}
-      <span className="flex min-w-0 items-center gap-3 border-t border-border px-3 py-2 text-xs text-muted-foreground">
+      <div className="flex min-w-0 items-center gap-3 border-t border-border px-3 py-2 text-xs text-muted-foreground">
         <span className="min-w-0 flex-1 truncate" title={name}>{name}</span>
         {canDownload && <a href={contentUrl(file.id, true)} download={name} className={action}>Download</a>}
         <button type="button" onClick={onOpen} className={action}>Open</button>
-      </span>
-    </span>
+      </div>
+    </div>
   );
 }
 

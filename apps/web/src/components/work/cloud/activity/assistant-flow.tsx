@@ -1,7 +1,7 @@
 "use client";
 
 import { artifactVisualsFromTools, type CloudApproval, type CloudToolInvocation } from "@lori-enterprise/contracts";
-import { useMemo, type ReactNode } from "react";
+import { Fragment, useMemo, type ComponentProps, type ReactNode } from "react";
 import { CloudMarkdown } from "../cloud-markdown";
 import { ChangedFiles } from "../files/changed-files";
 import { changedFilePaths } from "../files/changed-paths";
@@ -9,6 +9,32 @@ import { buildFlow } from "./activity-flow";
 import { CloudVisualActivity } from "../visuals/visual-activity";
 import { ToolGroup } from "./tool-group";
 import { TodoChecklist } from "./todo-checklist";
+
+const GENERATED_LINK = /\[[^\]]*\]\((generated\/[^)\s]+)\)/g;
+
+/**
+ * Generated media sits beside the Markdown, not inside it: the Markdown tree
+ * rebuilds on every render, which would restart a playing video.
+ */
+function ReplyText({
+  text,
+  renderFile,
+  ...markdown
+}: ComponentProps<typeof CloudMarkdown> & { renderFile?: (path: string) => ReactNode }) {
+  const media = renderFile
+    ? [...text.matchAll(GENERATED_LINK)].flatMap(([link, path]) => {
+        const view = renderFile(path!);
+        return view ? [{ link, path: path!, view }] : [];
+      })
+    : [];
+  const rest = media.reduce((remaining, item) => remaining.replace(item.link, ""), text).trim();
+  return (
+    <div className="space-y-3">
+      {rest && <CloudMarkdown text={rest} {...markdown} />}
+      {media.map((item) => <Fragment key={item.path}>{item.view}</Fragment>)}
+    </div>
+  );
+}
 
 /**
  * A reply in the order it happened: text, the tools the model used, then more text.
@@ -53,7 +79,7 @@ export function AssistantFlow({
     <div className="space-y-3">
       {parts.map((part) =>
         part.type === "text" ? (
-          <div key={part.key} data-conversation-search-text={part.key}><CloudMarkdown
+          <div key={part.key} data-conversation-search-text={part.key}><ReplyText
             text={part.text}
             existingPaths={existingPaths}
             onOpenFile={onOpenFile}

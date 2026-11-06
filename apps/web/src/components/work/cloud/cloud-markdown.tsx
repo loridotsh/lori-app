@@ -91,14 +91,11 @@ export function CloudMarkdown({
   existingPaths,
   onOpenFile,
   artifactTitles,
-  renderFile,
 }: {
   text: string;
   existingPaths?: ReadonlySet<string>;
   onOpenFile?: (path: string) => void;
   artifactTitles?: ReadonlyMap<string, string>;
-  /** Shows a linked file in place of its link, when the caller has a view for it. */
-  renderFile?: (path: string) => ReactNode;
 }) {
   return (
     <div
@@ -129,8 +126,6 @@ export function CloudMarkdown({
             }
             if (filePath && onOpenFile) {
               const path = filePath;
-              const inline = renderFile?.(path);
-              if (inline) return inline;
               const artifact = isArtifactFile(path);
               const title = artifactLinkText(path, textOf(children), artifactTitles?.get(path));
               return <button type="button" onClick={() => onOpenFile(path)} title={artifact ? `Open in workspace · ${path}` : undefined} aria-label={artifact ? `Open ${title ?? textOf(children)} in workspace` : undefined}
