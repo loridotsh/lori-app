@@ -542,12 +542,34 @@ export function cloudRunProblem(
         retry: true,
         fix: "models",
       };
+    case "provider_insufficient_balance":
+      return {
+        tone: "error",
+        title: "The provider account is out of funds",
+        detail: `The provider refused the request because its account balance is too low. ${saved} Add funds to the provider account, then try again.`,
+        retry: true,
+      };
+    case "provider_response_too_large":
+      return {
+        tone: "error",
+        title: "This reply was too long",
+        detail: `The model's reply went past what one step can carry. ${saved} Ask for it in smaller parts.`,
+        retry: true,
+      };
+    case "work_files_full":
+      return {
+        tone: "error",
+        title: "This conversation is out of file space",
+        detail: `There is no room for another generated file, so nothing was generated or charged. ${saved} Start a new conversation to keep going.`,
+        retry: false,
+        fix: "newConversation",
+      };
     case "provider_request_rejected":
       return {
         tone: "error",
         title: "The provider rejected this request",
-        detail: `The provider refused the request itself, which usually means a setting this model does not accept. ${saved} Try a different model, or ask an administrator to check the provider's configuration.`,
-        retry: false,
+        detail: `The provider refused this request. ${saved} Try again, and if it keeps happening, try a different model.`,
+        retry: true,
         fix: "models",
       };
     default:

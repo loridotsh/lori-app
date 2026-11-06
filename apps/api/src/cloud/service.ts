@@ -95,7 +95,11 @@ export const PROVIDER_FAILURES = [
   "provider_rate_limited",
   "provider_unavailable",
   "provider_request_rejected",
+  "provider_insufficient_balance",
+  "provider_response_too_large",
   "provider_context_exceeded",
+  // The conversation has no room left for a generated file.
+  "work_files_full",
   // The model asked for a tool that does not exist or sent unreadable arguments.
   // Reported by the worker (the only category it may name), never by a provider.
   "model_tool_call_invalid",
@@ -120,7 +124,8 @@ export function upstreamErrorFields(body: string): {
     const out: { code?: string; type?: string; param?: string } = {};
     for (const key of ["code", "type", "param"] as const) {
       const value = error[key];
-      if (typeof value === "string" && /^[A-Za-z0-9_.:-]{1,64}$/.test(value))
+      // Brackets are how a provider names the field it refused: messages[12].content.
+      if (typeof value === "string" && /^[A-Za-z0-9_.:[\]-]{1,64}$/.test(value))
         out[key] = value;
     }
     return out;
@@ -160,6 +165,7 @@ export function providerFailureFor(
   if (status === 413 || (contextExceeded && status >= 400 && status < 500))
     return "provider_context_exceeded";
   if (status === 401 || status === 403) return "provider_auth_failed";
+  if (status === 402) return "provider_insufficient_balance";
   if (status === 404 || ((status === 400 || status === 422) && mentionsModel))
     return "provider_model_unavailable";
   if (status === 408 || status === 429) return "provider_rate_limited";

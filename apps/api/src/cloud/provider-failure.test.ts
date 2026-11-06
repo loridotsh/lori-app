@@ -32,6 +32,7 @@ describe("providerFailureFor", () => {
     [400, true, "provider_model_unavailable"],
     [422, true, "provider_model_unavailable"],
     [400, false, "provider_request_rejected"],
+    [402, false, "provider_insufficient_balance"],
     [429, false, "provider_rate_limited"],
     [408, false, "provider_rate_limited"],
     [500, false, "provider_unavailable"],
