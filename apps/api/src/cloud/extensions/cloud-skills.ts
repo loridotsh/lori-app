@@ -16,6 +16,18 @@ import type { Catalog } from "./service.js";
  */
 export const CLOUD_SKILLS_VERSION_SUFFIX = "-cloud";
 
+/**
+ * The file a `load_skill` reference means. Models often shorten
+ * `references/creation.md` to `creation.md` or `creation`, so an unambiguous short
+ * name resolves instead of costing a round. Unknown names return undefined.
+ */
+export function skillReference(references: Record<string, string>, value: string): string | undefined {
+  const name = value.replace(/^\.?\//, "");
+  if (name === "SKILL.md" || Object.hasOwn(references, name)) return name;
+  const file = name.split("/").at(-1)!.replace(/\.md$/, "");
+  return Object.hasOwn(references, `references/${file}.md`) ? `references/${file}.md` : undefined;
+}
+
 const directory = new URL("../../../catalog/cloud-skills/", import.meta.url);
 
 function readMarkdown(folder: string): Record<string, string> {

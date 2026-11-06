@@ -17,6 +17,7 @@ import type {
 } from "@lori-enterprise/contracts";
 import type { CloudActor, CloudWorkService } from "../service.js";
 import type { ToolCall } from "../tools.js";
+import { skillReference } from "./cloud-skills.js";
 import { CredentialVault, failure, hash, redact } from "./security.js";
 import { McpSession, safeHttp, type Http, type Plugin } from "./transport.js";
 import { CloudOAuth } from "./oauth.js";
@@ -612,11 +613,7 @@ export class CloudExtensions {
             404,
             "That skill does not exist. Use an id from the skills listed for this conversation.",
           );
-        if (
-          args.reference &&
-          args.reference !== "SKILL.md" &&
-          !Object.hasOwn(skill.references, String(args.reference))
-        )
+        if (args.reference && !skillReference(skill.references, String(args.reference)))
           failure(
             "cloud_extension_skill_reference",
             404,
@@ -699,14 +696,12 @@ export class CloudExtensions {
     >;
     if (call.name === "load_skill") {
       const s = this.catalog.skills.find((s) => s.id === args.id)!;
+      const reference = args.reference ? skillReference(s.references, String(args.reference))! : "SKILL.md";
       return {
         id: s.id,
         version: s.version,
-        reference: args.reference ?? "SKILL.md",
-        content:
-          !args.reference || args.reference === "SKILL.md"
-            ? s.instructions
-            : s.references[String(args.reference)],
+        reference,
+        content: reference === "SKILL.md" ? s.instructions : s.references[reference],
         references: ["SKILL.md", ...Object.keys(s.references)],
       };
     }

@@ -1,7 +1,20 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { overlayCloudSkills, parseSkillFile } from "./cloud-skills.js";
+import { overlayCloudSkills, parseSkillFile, skillReference } from "./cloud-skills.js";
 import type { Catalog } from "./service.js";
+
+describe("skillReference", () => {
+  const references = { "references/creation.md": "guide" };
+  it.each(["references/creation.md", "./references/creation.md", "creation.md", "creation", "docs/creation.md"])(
+    "resolves %s", (name) => {
+      expect(skillReference(references, name)).toBe("references/creation.md");
+    });
+  it("keeps the main guide and refuses what does not exist", () => {
+    expect(skillReference(references, "SKILL.md")).toBe("SKILL.md");
+    expect(skillReference(references, "research")).toBeUndefined();
+    expect(skillReference(references, "__proto__")).toBeUndefined();
+  });
+});
 
 const base = JSON.parse(
   readFileSync(
