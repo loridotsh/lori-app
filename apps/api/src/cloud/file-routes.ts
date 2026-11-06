@@ -5,6 +5,7 @@ import { IdentityError } from "../auth/identity-service.js";
 const Id = z.string().uuid();
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
 const Version = z.coerce.number().int().positive();
+const MAX_READS_PER_MEMBER = 8;
 export function registerCloudFileRoutes(
   app: FastifyInstance,
   cloud: CloudWorkService,
@@ -12,7 +13,18 @@ export function registerCloudFileRoutes(
   const actors = new WeakMap<FastifyRequest, CloudActor>();
   const transfers = new WeakSet<FastifyRequest>();
   let active = 0;
+  // Reads are many and small (a page of images, a player's ranges), so each member
+  // gets their own allowance and one person's video never blocks another's upload.
+  const reads = new Map<string, number>();
+  const readers = new WeakMap<FastifyRequest, string>();
   const release = (req: FastifyRequest) => {
+    const reader = readers.get(req);
+    if (reader !== undefined) {
+      readers.delete(req);
+      const left = (reads.get(reader) ?? 1) - 1;
+      if (left > 0) reads.set(reader, left);
+      else reads.delete(reader);
+    }
     if (transfers.has(req)) {
       transfers.delete(req);
       active--;
@@ -38,7 +50,8 @@ export function registerCloudFileRoutes(
         "This request came from an untrusted origin.",
       );
     const actor = await cloud.actor(req.headers);
-    await cloud.throttleMutation(actor.memberId);
+    if (write) await cloud.throttleMutation(actor.memberId);
+    else await cloud.throttlePreview(actor.memberId);
     await cloud.transaction(async (c) => {
       await cloud.ensure(c, actor);
       const id = z.object({ id: Id }).strict().parse(req.params).id;
@@ -55,14 +68,20 @@ export function registerCloudFileRoutes(
         "cloud_upload_content_type",
         "Use application/octet-stream for file uploads.",
       );
-    if (active >= 4)
+    const reading = reads.get(actor.memberId) ?? 0;
+    if (write ? active >= 4 : reading >= MAX_READS_PER_MEMBER)
       throw new IdentityError(
         429,
         "cloud_transfer_busy",
         "Cloud file transfers are busy. Retry shortly.",
       );
-    active++;
-    transfers.add(req);
+    if (write) {
+      active++;
+      transfers.add(req);
+    } else {
+      reads.set(actor.memberId, reading + 1);
+      readers.set(req, actor.memberId);
+    }
     actors.set(req, actor);
   };
   const params = (value: unknown) => z.object({ id: Id }).strict().parse(value);
@@ -111,10 +130,12 @@ export function registerCloudFileRoutes(
       const query = z.object({ download: z.enum(["true", "false"]).optional() })
         .strict()
         .parse(req.query);
-      const { file, bytes } = await cloud.files.download(
+      const { file, window, bytes } = await cloud.files.content(
         actors.get(req)!,
         params(req.params).id,
         query.download !== "false",
+        // Players ask for ranges so they can seek, and Safari needs them to play at all.
+        req.headers.range,
       );
       reply.header("content-type", file.mimeType);
       reply.header("x-content-type-options", "nosniff");
@@ -125,17 +146,13 @@ export function registerCloudFileRoutes(
       );
       reply.header("etag", `"${file.sha256}"`);
       reply.header("accept-ranges", "bytes");
-      // Video players ask for ranges so they can seek, and Safari needs them to play at all.
-      const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range ?? "");
-      if (range && (range[1] || range[2]) && bytes.length) {
-        const start = range[1] ? Number(range[1]) : Math.max(bytes.length - Number(range[2]), 0);
-        const end = range[1] && range[2] ? Math.min(Number(range[2]), bytes.length - 1) : bytes.length - 1;
-        if (start > end || start >= bytes.length) {
-          reply.header("content-range", `bytes */${bytes.length}`);
-          return reply.code(416).send();
-        }
-        reply.header("content-range", `bytes ${start}-${end}/${bytes.length}`);
-        return reply.code(206).send(bytes.subarray(start, end + 1));
+      if (window === "unsatisfiable") {
+        reply.header("content-range", `bytes */${file.sizeBytes}`);
+        return reply.code(416).send();
+      }
+      if (window) {
+        reply.header("content-range", `bytes ${window.start}-${window.end}/${file.sizeBytes}`);
+        return reply.code(206).send(bytes);
       }
       return reply.send(bytes);
     },

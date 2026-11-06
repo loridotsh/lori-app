@@ -52,7 +52,10 @@ export async function proxyApiRequest(request: Request): Promise<Response> {
       headers,
       cache: "no-store",
       redirect: "manual",
-      signal: AbortSignal.any([request.signal, AbortSignal.timeout(120_000)]),
+      // A large file can take longer to download than any other request should.
+      signal: /\/files\/[^/]+\/content$/.test(upstream.pathname)
+        ? request.signal
+        : AbortSignal.any([request.signal, AbortSignal.timeout(120_000)]),
     };
     if (request.method !== "GET" && request.method !== "HEAD" && request.body) {
       init.body = request.body;

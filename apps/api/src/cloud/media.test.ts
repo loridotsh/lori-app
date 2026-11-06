@@ -17,6 +17,9 @@ describe("mediaPrompt", () => {
       { type: "text", text: "in the rain" },
     ] }])).toBe("A paper boat\nin the rain");
   });
+  it("leaves the attached file list out of the prompt", () => {
+    expect(mediaPrompt([{ role: "user", content: "A paper boat\n\nAttached workspace files: notes.md, a.png" }])).toBe("A paper boat");
+  });
   it("returns nothing when there is no member text", () => {
     expect(mediaPrompt([{ role: "assistant", content: "Hello" }])).toBe("");
     expect(mediaPrompt("not a list")).toBe("");

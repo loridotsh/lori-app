@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { generatedFileMime } from "./files.js";
+import { byteWindow, generatedFileMime } from "./files.js";
+
+describe("byteWindow", () => {
+  const MiB = 1024 * 1024;
+  it("serves the bytes asked for, within the file", () => {
+    expect(byteWindow("bytes=0-99", 1000)).toEqual({ start: 0, end: 99 });
+    expect(byteWindow("bytes=900-5000", 1000)).toEqual({ start: 900, end: 999 });
+    expect(byteWindow("bytes=-100", 1000)).toEqual({ start: 900, end: 999 });
+  });
+  it("caps an open-ended request so a paused player never holds a whole file", () => {
+    expect(byteWindow("bytes=0-", 200 * MiB)).toEqual({ start: 0, end: 4 * MiB - 1 });
+    expect(byteWindow("bytes=0-", 1000)).toEqual({ start: 0, end: 999 });
+  });
+  it("tells an impossible range from no range at all", () => {
+    expect(byteWindow("bytes=1000-", 1000)).toBe("unsatisfiable");
+    expect(byteWindow("bytes=9-3", 1000)).toBe("unsatisfiable");
+    expect(byteWindow("bytes=0-", 0)).toBe("unsatisfiable");
+    expect(byteWindow("bytes=-", 1000)).toBeNull();
+    expect(byteWindow("items=0-9", 1000)).toBeNull();
+    expect(byteWindow(undefined, 1000)).toBeNull();
+  });
+});
 
 describe("Generated document media types", () => {
   it("recognizes a PDF only with the expected extension and signature", () => {

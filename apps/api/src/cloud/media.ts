@@ -24,8 +24,8 @@ import {
 import type { LeaseClaims } from "./security.js";
 
 const IMAGE_TIMEOUT_MS = 5 * 60 * 1000;
-/** Inside the worker's 15-minute run budget, so a slow clip fails with a clear reason. */
-const VIDEO_DEADLINE_MS = 13 * 60 * 1000;
+/** Well inside the worker's 60-minute run budget, so a slow clip fails with a clear reason. */
+const VIDEO_DEADLINE_MS = 30 * 60 * 1000;
 const POLL_INTERVAL_MS = 5000;
 const REQUEST_TIMEOUT_MS = 60_000;
 const KEEP_ALIVE_MS = 15_000;
@@ -55,12 +55,13 @@ export function mediaPrompt(messages: unknown): string {
   if (!Array.isArray(messages)) return "";
   const latest = [...messages].reverse().find((message) => message?.role === "user");
   const content: unknown = latest?.content;
-  if (typeof content === "string") return content.trim();
-  if (!Array.isArray(content)) return "";
-  return content
-    .flatMap((part) => (typeof part?.text === "string" ? [part.text as string] : []))
-    .join("\n")
-    .trim();
+  const text = typeof content === "string"
+    ? content
+    : Array.isArray(content)
+      ? content.flatMap((part) => (typeof part?.text === "string" ? [part.text as string] : [])).join("\n")
+      : "";
+  // The list of attached files is for chat models; it is not part of the picture.
+  return text.replace(/\n\nAttached workspace files: .*$/s, "").trim();
 }
 
 async function boundedBytes(response: Response, limit: number): Promise<Buffer> {
@@ -223,6 +224,11 @@ export function mediaStream(input: {
   void (async () => {
     try {
       if (!prompt) throw new MediaFailure("provider_request_rejected", 400);
+      const room = await cloud.transaction(async (c) => {
+        const { r } = await cloud.lease(c, claims);
+        return cloud.files.generatedRoomTx(c, r.conversation_id);
+      });
+      if (!room) throw new MediaFailure("work_files_full", 413);
       out.write(frame(model.id, { role: "assistant", content: `Generating your ${kind} with ${model.name}.\n\n` }, null));
       const generation: Generation = {
         base: target.upstreamBaseUrl.replace(/\/+$/, ""),

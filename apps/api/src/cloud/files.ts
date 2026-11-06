@@ -12,10 +12,27 @@ import { projectContext, openText, sealText, openJson, sealJson } from "./projec
 import { projectPathKey, sealProjectBytes, openProjectBytes } from "./projects/crypto.js";
 import type { CloudActor, CloudWorkService } from "./service.js";
 const MAX_FILE = 20 * 1024 * 1024,
-  MAX_TOTAL = 100 * 1024 * 1024;
+  MAX_TOTAL = 100 * 1024 * 1024,
+  MAX_FILES = 100;
 /** A generated clip is already paid for, so it gets more room than an upload. */
 export const MAX_GENERATED_FILE = 256 * 1024 * 1024;
 const MAX_GENERATED_TOTAL = 2 * 1024 * 1024 * 1024;
+/** Most bytes one Range response carries; players ask again for the next window. */
+const MAX_RANGE = 4 * 1024 * 1024;
+
+/**
+ * The bytes a `Range: bytes=…` header asks for, inclusive and capped, so a paused
+ * player never holds a transfer open for a whole file. Null means no usable range
+ * was asked for; "unsatisfiable" asks for nothing inside the file.
+ */
+export function byteWindow(header: string | undefined, size: number) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header ?? "");
+  if (!match || (!match[1] && !match[2])) return null;
+  const start = match[1] ? Number(match[1]) : Math.max(size - Number(match[2]), 0);
+  const last = match[1] && match[2] ? Number(match[2]) : size - 1;
+  if (start >= size || start > last) return "unsatisfiable" as const;
+  return { start, end: Math.min(last, size - 1, start + MAX_RANGE - 1) };
+}
 export function virtualPath(value: string): string {
   if (
     value.length < 1 ||
@@ -244,6 +261,38 @@ export class CloudFiles {
       );
     return data;
   }
+  /** One window of a stored file. Plain blobs are read in place, so seeking a long clip never reloads all of it. */
+  private async sliceTx(c: PoolClient, file: CloudFile, start: number, end: number) {
+    if (projectContext(c)) return (await this.readTx(c, file)).subarray(start, end + 1);
+    const version = await c.query<{ storage_key: string }>(
+      "SELECT storage_key FROM cloud_work_file_versions WHERE file_id=$1 AND version=$2",
+      [file.id, file.version],
+    );
+    if (!version.rows[0])
+      throw new IdentityError(503, "cloud_file_storage_unavailable", "Cloud file is unavailable.");
+    const handle = await open(this.blobPath(version.rows[0].storage_key), constants.O_RDONLY | constants.O_NOFOLLOW);
+    try {
+      const bytes = Buffer.alloc(end - start + 1);
+      const { bytesRead } = await handle.read(bytes, 0, bytes.length, start);
+      if (bytesRead !== bytes.length)
+        throw new IdentityError(503, "cloud_file_storage_unavailable", "Cloud file is unavailable.");
+      return bytes;
+    } finally {
+      await handle.close();
+    }
+  }
+  /** What the content route serves: the whole file, or the window a player asked for. */
+  async content(a: CloudActor, id: string, exported: boolean, range?: string) {
+    return this.cloud.transaction(async (c) => {
+      await this.cloud.ensure(c, a);
+      const file = await this.fileTx(c, a, id);
+      if (file.projectId && exported) await this.cloud.projects.authorize(c, a, file.projectId, "export");
+      const window = byteWindow(range, file.sizeBytes);
+      if (window === "unsatisfiable") return { file, window };
+      if (window) return { file, window, bytes: await this.sliceTx(c, file, window.start, window.end) };
+      return { file, window, bytes: await this.readTx(c, file) };
+    });
+  }
   async download(a: CloudActor, id: string, exported = true) {
     return this.cloud.transaction(async (c) => {
       await this.cloud.ensure(c, a);
@@ -357,6 +406,19 @@ export class CloudFiles {
     }
     return null;
   }
+  /** Generated files have their own allowance, so a large clip never blocks ordinary files. */
+  private async quotaTx(c: PoolClient, conversationId: string) {
+    const { rows: [row] } = await c.query<{ n: string; size: string; ordinary: string }>(
+      "SELECT count(DISTINCT f.id) AS n,COALESCE(sum(v.size_bytes),0) AS size,COALESCE(sum(v.size_bytes) FILTER (WHERE NOT f.generated),0) AS ordinary FROM cloud_work_files f LEFT JOIN cloud_work_file_versions v ON v.file_id=f.id WHERE f.conversation_id=$1",
+      [conversationId],
+    );
+    return { files: Number(row!.n), total: Number(row!.size), ordinary: Number(row!.ordinary) };
+  }
+  /** Asked before generating, so a full conversation is never charged for a file it cannot keep. */
+  async generatedRoomTx(c: PoolClient, conversationId: string) {
+    const quota = await this.quotaTx(c, this.rootId(c, conversationId));
+    return quota.files < MAX_FILES && quota.total + MAX_GENERATED_FILE <= MAX_GENERATED_TOTAL;
+  }
   async saveTx(
     c: PoolClient,
     a: CloudActor,
@@ -373,7 +435,7 @@ export class CloudFiles {
       throw new IdentityError(
         413,
         "cloud_file_too_large",
-        "Cloud files are limited to 20 MiB.",
+        `Cloud files are limited to ${generated ? 256 : 20} MiB.`,
       );
     await this.cloud.ownConversation(c, a, conversationId, true, "files.write");
     const originalConversationId = conversationId;
@@ -399,13 +461,11 @@ export class CloudFiles {
     // Otherwise independently valid files such as "reports" and "reports/a"
     // make every staged command fail before it can run.
     await this.checkPathTx(c, conversationId, path, old?.id);
-    const quota = await c.query<{ n: string; size: string }>(
-      "SELECT count(DISTINCT f.id) AS n,COALESCE(sum(v.size_bytes),0) AS size FROM cloud_work_files f LEFT JOIN cloud_work_file_versions v ON v.file_id=f.id WHERE f.conversation_id=$1",
-      [conversationId],
-    );
+    const quota = await this.quotaTx(c, conversationId);
     if (
-      (!old && Number(quota.rows[0]!.n) >= 100) ||
-      Number(quota.rows[0]!.size) + bytes.length > (generated ? MAX_GENERATED_TOTAL : MAX_TOTAL)
+      (!old && quota.files >= MAX_FILES) ||
+      quota.total + bytes.length > MAX_GENERATED_TOTAL ||
+      (!generated && quota.ordinary + bytes.length > MAX_TOTAL)
     )
       throw new IdentityError(
         413,
@@ -433,8 +493,8 @@ export class CloudFiles {
           ).rows[0]
         : (
             await c.query(
-              "INSERT INTO cloud_work_files(id,conversation_id,path,mime_type,size_bytes,sha256,path_key,path_prefixes) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *",
-              [id, conversationId, sealText(c, "file", id, "path", path), mime, bytes.length, hash, pathKey, scope ? this.prefixes(path).map(p => projectPathKey(scope, p)) : null],
+              "INSERT INTO cloud_work_files(id,conversation_id,path,mime_type,size_bytes,sha256,path_key,path_prefixes,generated) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *",
+              [id, conversationId, sealText(c, "file", id, "path", path), mime, bytes.length, hash, pathKey, scope ? this.prefixes(path).map(p => projectPathKey(scope, p)) : null, generated],
             )
           ).rows[0];
       await c.query(
