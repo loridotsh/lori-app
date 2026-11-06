@@ -45,7 +45,8 @@ function counter(value: unknown) {
     : null;
 }
 export function mergeUsage(previous: PricedUsage | undefined, next: CloudReportedUsage, snapshot?: WorkPricing | null): PricedUsage {
-  return priceUsage(Object.fromEntries(KEYS.map((k) => [k, counter(next[k]) ?? counter(previous?.[k])])),
+  // A later zero means "not reported here": it must not erase a real count.
+  return priceUsage(Object.fromEntries(KEYS.map((k) => [k, counter(next[k]) || counter(previous?.[k]) || counter(next[k])])),
     previous?.pricingSnapshot !== undefined ? previous.pricingSnapshot : snapshot);
 }
 export function normalizeProviderUsage(
@@ -303,7 +304,7 @@ export function cloudUsageObserver(
           const valid = key === "cost"
             ? typeof value === "number" && value >= 0 && counter(Math.round(value * 1_000_000)) !== null
             : counter(value) !== null;
-          if (valid) accumulated[key] = value;
+          if (valid && (value !== 0 || accumulated[key] === undefined)) accumulated[key] = value;
         }
         for (const key of ["input_tokens_details", "prompt_tokens_details", "output_tokens_details", "completion_tokens_details", "cache_creation"]) {
           const details = raw[key];

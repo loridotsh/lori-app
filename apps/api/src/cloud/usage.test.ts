@@ -49,6 +49,16 @@ describe("Cloud provider usage semantics", () => {
       ),
     ).toMatchObject({ inputTokens: 20, outputTokens: 10, cacheReadTokens: 80 });
   });
+  it("never lets a later zero erase a real count", async () => {
+    expect(mergeUsage({ outputTokens: 40 }, { outputTokens: 0 }).outputTokens).toBe(40);
+    expect(mergeUsage(undefined, { outputTokens: 0 }).outputTokens).toBe(0);
+    const reports: { outputTokens?: number | null }[] = [];
+    const observer = cloudUsageObserver("openai", async (usage) => { reports.push(usage); });
+    observer.resume();
+    observer.end('data: {"usage":{"prompt_tokens":5,"completion_tokens":40}}\n\ndata: {"usage":{"completion_tokens":0}}\n\n');
+    await new Promise((resolve) => observer.once("end", resolve));
+    expect(reports.at(-1)?.outputTokens).toBe(40);
+  });
   it("commits usage before forwarding exact byte framing to a worker", async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));
