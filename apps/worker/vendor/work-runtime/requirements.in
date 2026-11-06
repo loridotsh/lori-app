@@ -1,0 +1,10 @@
+ddgs==9.16.0
+python-docx
+openpyxl
+python-pptx
+pypdfium2
+pypdf>=6.21.1
+Pillow>=13.0.0
+matplotlib
+reportlab
+pytesseract

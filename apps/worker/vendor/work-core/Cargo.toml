@@ -1,0 +1,9 @@
+[package]
+name = "lori-work-core"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+lori-work-provider = { path = "../work-provider" }
+serde_json = "1"

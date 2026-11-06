@@ -1,0 +1,16 @@
+[
+  {"name":"create","valid":true,"arguments":{"expectedRevision":0,"todos":[{"id":"review-1","content":"Inspect the source","status":"in_progress"},{"id":"verify_2","content":"Verify results","status":"pending"}]}},
+  {"name":"clear","valid":true,"arguments":{"expectedRevision":0,"todos":[]}},
+  {"name":"duplicate IDs","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"a","content":"A","status":"pending"},{"id":"a","content":"B","status":"pending"}]}},
+  {"name":"multiple current tasks","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"a","content":"A","status":"in_progress"},{"id":"b","content":"B","status":"in_progress"}]}},
+  {"name":"blank content","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"a","content":"  \n","status":"pending"}]}},
+  {"name":"unsafe ID","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"../a","content":"A","status":"pending"}]}},
+  {"name":"unknown status","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"a","content":"A","status":"failed"}]}},
+  {"name":"non-string status","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"a","content":"A","status":["pending"]}]}},
+  {"name":"extra item property","valid":false,"arguments":{"expectedRevision":0,"todos":[{"id":"a","content":"A","status":"pending","approved":true}]}},
+  {"name":"extra property","valid":false,"arguments":{"expectedRevision":0,"todos":[],"conversationId":"foreign"}},
+  {"name":"missing revision","valid":false,"arguments":{"todos":[]}},
+  {"name":"negative revision","valid":false,"arguments":{"expectedRevision":-1,"todos":[]}},
+  {"name":"fractional revision","valid":false,"arguments":{"expectedRevision":0.1,"todos":[]}},
+  {"name":"unsafe revision","valid":false,"arguments":{"expectedRevision":9007199254740991,"todos":[]}}
+]
