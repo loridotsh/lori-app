@@ -10,6 +10,7 @@
  * shortened, and only then are the oldest turns dropped. The member's latest
  * message and the most recent tool results are never compacted.
  */
+import { createHash } from "node:crypto";
 import { imageMessage, renderedPageMessages } from "./continuation.js";
 import { modelOutput } from "./tools.js";
 
@@ -71,6 +72,39 @@ export interface AssembleInput {
   preface: string[];
 }
 
+/** OpenAI's limit, the strictest a gateway routes to. */
+const MAX_CALL_ID = 64;
+
+/**
+ * The ID a tool call carries on the wire. A model can issue an ID longer than
+ * another provider accepts, and Anthropic also limits its characters. IDs only
+ * pair a call with its result, so a stable hash serves as well. Stored receipts
+ * keep the original.
+ */
+export function wireCallId(protocol: AssembleInput["protocol"], id: string): string {
+  if (id.length <= MAX_CALL_ID && (protocol === "openai" || /^[A-Za-z0-9_-]+$/.test(id))) return id;
+  return `call_${createHash("sha256").update(id).digest("hex").slice(0, 32)}`;
+}
+
+function wireAssistant(protocol: AssembleInput["protocol"], native: unknown): unknown {
+  if (protocol === "openai") {
+    const calls = (native as { tool_calls?: unknown } | null)?.tool_calls;
+    if (!Array.isArray(calls)) return native;
+    return {
+      ...(native as object),
+      tool_calls: (calls as { id?: unknown }[]).map((call) =>
+        typeof call?.id === "string" ? { ...call, id: wireCallId(protocol, call.id) } : call,
+      ),
+    };
+  }
+  if (!Array.isArray(native)) return native;
+  return (native as { type?: unknown; id?: unknown }[]).map((block) =>
+    block?.type === "tool_use" && typeof block.id === "string"
+      ? { ...block, id: wireCallId(protocol, block.id) }
+      : block,
+  );
+}
+
 /** Cuts without splitting a surrogate pair. */
 export function shorten(text: string, max: number): string {
   if (text.length <= max) return text;
@@ -111,11 +145,11 @@ export function assembleMessages(input: AssembleInput, level: Compaction): unkno
   for (const round of input.rounds) {
     const recent = input.index - round.index <= RECENT_ROUNDS;
     if (input.protocol === "openai")
-      messages.push(round.assistant.native ?? { role: "assistant", content: round.assistant.text });
+      messages.push(wireAssistant(input.protocol, round.assistant.native) ?? { role: "assistant", content: round.assistant.text });
     else
       messages.push({
         role: "assistant",
-        content: round.assistant.native ?? [{ type: "text", text: round.assistant.text }],
+        content: wireAssistant(input.protocol, round.assistant.native) ?? [{ type: "text", text: round.assistant.text }],
       });
     const images: NonNullable<ReturnType<typeof imageMessage>>[] = [];
     const results: unknown[] = [];
@@ -128,11 +162,11 @@ export function assembleMessages(input: AssembleInput, level: Compaction): unkno
         ? { ...preview, receiptId: call.invocationId }
         : { result: preview, receiptId: call.invocationId });
       if (input.protocol === "openai")
-        messages.push({ role: "tool", tool_call_id: call.id, content: text });
+        messages.push({ role: "tool", tool_call_id: wireCallId(input.protocol, call.id), content: text });
       else
         results.push({
           type: "tool_result",
-          tool_use_id: call.id,
+          tool_use_id: wireCallId(input.protocol, call.id),
           content: text,
           is_error: call.status !== "completed",
         });

@@ -3,6 +3,7 @@ import {
   COMPACTION_LEVELS,
   assembleMessages,
   shorten,
+  wireCallId,
   type AssembleInput,
   type PriorRound,
 } from "./context-budget.js";
@@ -113,6 +114,53 @@ describe("assembleMessages", () => {
     it("is deterministic", () => {
       expect(assembleMessages(heavy(), COMPACTION_LEVELS[2]!)).toEqual(assembleMessages(heavy(), COMPACTION_LEVELS[2]!));
     });
+  });
+});
+
+interface Wire {
+  role?: string;
+  tool_call_id?: string;
+  tool_calls?: { id: string }[];
+  content?: { id?: string; tool_use_id?: string }[];
+}
+
+describe("tool call IDs on the wire", () => {
+  const doubled = "call_69a924c553e94cfa9ae4a1b6a285bee2".repeat(2);
+  const longCall = (id: string): PriorRound => ({
+    index: 0,
+    assistant: { text: "", native: { role: "assistant", content: "", tool_calls: [{ id, type: "function", function: { name: "read_file", arguments: "{}" } }] } },
+    calls: [{ id, name: "read_file", status: "completed", invocationId: "00000000-0000-4000-8000-000000000000", output: { ok: true } }],
+  });
+  const sent = (id: string) => {
+    const messages = assembleMessages(input({ history: [], rounds: [longCall(id)], index: 1 }), COMPACTION_LEVELS[0]!) as Wire[];
+    return { call: messages.find((m) => m.tool_calls)!.tool_calls![0]!.id, result: messages.find((m) => m.role === "tool")!.tool_call_id };
+  };
+  it("replays the run that failed: a 74-character ID now fits, and still pairs with its result", () => {
+    const { call, result } = sent(doubled);
+    expect(doubled).toHaveLength(74);
+    expect(call).toHaveLength(37);
+    expect(result).toBe(call);
+    expect(sent(doubled).call).toBe(call);
+  });
+  it("leaves every ID a provider accepts exactly as it was", () => {
+    const fits = "x".repeat(64);
+    expect(sent(fits)).toEqual({ call: fits, result: fits });
+  });
+  it("keeps distinct long IDs distinct", () => {
+    expect(wireCallId("openai", `${"a".repeat(70)}1`)).not.toBe(wireCallId("openai", `${"a".repeat(70)}2`));
+  });
+  it("also rewrites IDs Anthropic would refuse for their characters", () => {
+    const id = "functions.read_file:0";
+    const round: PriorRound = {
+      index: 0,
+      assistant: { text: "", native: [{ type: "tool_use", id, name: "read_file", input: {} }] },
+      calls: [{ id, name: "read_file", status: "completed", invocationId: "00000000-0000-4000-8000-000000000000", output: { ok: true } }],
+    };
+    const messages = assembleMessages(input({ protocol: "anthropic", history: [], rounds: [round], index: 1 }), COMPACTION_LEVELS[0]!) as Wire[];
+    const use = messages.find((m) => m.role === "assistant")!.content![0]!.id;
+    expect(use).toMatch(/^[A-Za-z0-9_-]+$/);
+    expect(messages.find((m) => m.role === "user")!.content![0]!.tool_use_id).toBe(use);
+    expect(wireCallId("openai", id)).toBe(id);
   });
 });
 
